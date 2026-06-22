@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>County Gap Tracker</title>
+<script>(function(){var t=localStorage.getItem('gap-theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+<script src="https://urldefense.com/v3/__https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js__;!!LyAuvDCm-53-y27wV7iK5g!15OPDK2beOFhnwxYqGdE-3SX1DaSU3UqjUXVBBBxlTKWaKPFd7pISjM8R2op9yeujVbQ6_uFj7c2vY9omXDkQj4xwkKaAG6a6ERVQQ$"></script>
+<script src="https://urldefense.com/v3/__https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js__;!!LyAuvDCm-53-y27wV7iK5g!15OPDK2beOFhnwxYqGdE-3SX1DaSU3UqjUXVBBBxlTKWaKPFd7pISjM8R2op9yeujVbQ6_uFj7c2vY9omXDkQj4xwkKaAG4y1ZLuLg$"></script>
+<script src="https://urldefense.com/v3/__https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js__;!!LyAuvDCm-53-y27wV7iK5g!15OPDK2beOFhnwxYqGdE-3SX1DaSU3UqjUXVBBBxlTKWaKPFd7pISjM8R2op9yeujVbQ6_uFj7c2vY9omXDkQj4xwkKaAG4ktl61AA$"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F4F4F8;--s1:#FFFFFF;--s2:#F8F8FC;--s3:#EFEFF6;--s4:#E6E6F0;
+  --b0:rgba(0,0,0,0.05);--b1:rgba(0,0,0,0.08);--b2:rgba(0,0,0,0.14);
+  --t0:#1A1A2E;--t1:rgba(26,26,46,0.72);--t2:rgba(26,26,46,0.50);--t3:rgba(26,26,46,0.35);
+  --shadow:0 1px 3px rgba(0,0,0,0.07),0 6px 20px rgba(0,0,0,0.05);
+  --shadow-md:0 2px 8px rgba(0,0,0,0.08),0 12px 32px rgba(0,0,0,0.06);
+  --shadow-lg:0 4px 12px rgba(0,0,0,0.10),0 24px 56px rgba(0,0,0,0.10);
+  --hdr-bg:rgba(255,255,255,0.94);--hdr-border:rgba(0,0,0,0.06);
+  --map-empty:#EBEBF4;--map-state-stroke:rgba(255,255,255,0.55);
+  --scrollbar:rgba(0,0,0,0.14);
+}
+[data-theme="dark"]{
+  --bg:#09090F;--s1:#111119;--s2:#17171F;--s3:#1E1E28;--s4:#26263A;
+  --b0:rgba(255,255,255,0.04);--b1:rgba(255,255,255,0.08);--b2:rgba(255,255,255,0.14);
+  --t0:#FFFFFF;--t1:rgba(255,255,255,0.72);--t2:rgba(255,255,255,0.50);--t3:rgba(255,255,255,0.32);
+  --shadow:0 1px 3px rgba(0,0,0,0.50),0 6px 20px rgba(0,0,0,0.35);
+  --shadow-md:0 2px 8px rgba(0,0,0,0.50),0 12px 32px rgba(0,0,0,0.40);
+  --shadow-lg:0 4px 12px rgba(0,0,0,0.60),0 24px 56px rgba(0,0,0,0.50);
+  --hdr-bg:rgba(9,9,15,0.90);--hdr-border:rgba(255,255,255,0.06);
+  --map-empty:#1A1A28;--map-state-stroke:rgba(255,255,255,0.07);
+  --scrollbar:rgba(255,255,255,0.14);
+}
+:root,[data-theme="dark"]{
+  --indigo:#5B5BD6;--blue:#2563EB;--teal:#0D9488;--green:#16A34A;
+  --red:#DC2626;--orange:#EA580C;--amber:#D97706;--purple:#7C3AED;--pink:#DB2777;
+  --radius:14px;--radius-sm:9px;
+  --mono:'SF Mono',SFMono-Regular,'Fira Code','Courier New',monospace;
+  --sans:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif;
+}
+.theme-transitioning,.theme-transitioning *{transition:background-color 0.28s ease,border-color 0.22s ease,color 0.18s ease,box-shadow 0.28s ease !important}
+html{font-size:14px;scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--t0);-webkit-font-smoothing:antialiased;min-height:100vh;overflow-x:hidden}
+button,input{font-family:inherit}button{cursor:pointer}input{outline:none}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--scrollbar);border-radius:3px}
+
+/* LOADING OVERLAY */
+#loading-overlay{position:fixed;inset:0;background:var(--bg);z-index:9999;
+  display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px}
+.spinner{width:40px;height:40px;border-radius:50%;border:3px solid var(--b1);
+  border-top-color:var(--indigo);animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#loading-overlay p{color:var(--t2);font-size:13px}
+
+/* HEADER */
+.header{position:sticky;top:0;z-index:200;background:var(--hdr-bg);
+  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid var(--hdr-border)}
+.hdr-top{display:flex;align-items:center;justify-content:space-between;padding:13px 28px;gap:16px}
+.logo-wrap{display:flex;align-items:center;gap:11px;flex-shrink:0}
+.logo-icon{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#5B5BD6,#7C3AED);
+  display:flex;align-items:center;justify-content:center;font-size:15px;color:#fff;
+  box-shadow:0 2px 10px rgba(91,91,214,0.30)}
+.logo-name{font-size:15px;font-weight:700;letter-spacing:-0.02em;color:var(--indigo)}
+.logo-sub{font-size:10px;color:var(--t3);letter-spacing:0.06em;text-transform:uppercase;margin-top:1px}
+.hdr-right{display:flex;align-items:center;gap:12px;flex-shrink:0}
+.hdr-meta{font-size:11px;color:var(--t3);text-align:right;line-height:1.6}
+.hdr-meta strong{color:var(--t2)}
+.fresh-row{display:flex;align-items:center;gap:6px;justify-content:flex-end;margin-top:2px}
+.fresh-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;animation:pulsedot 2s ease-in-out infinite}
+@keyframes pulsedot{0%,100%{opacity:1}50%{opacity:0.35}}
+.refresh-btn{width:22px;height:22px;border-radius:50%;border:1px solid var(--b1);background:var(--s2);
+  color:var(--t2);font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  transition:all 0.15s ease}
+.refresh-btn:hover{border-color:var(--b2);color:var(--t0);transform:rotate(35deg)}
+.theme-btn{display:flex;align-items:center;gap:6px;padding:7px 13px;border-radius:20px;
+  border:1px solid var(--b1);background:var(--s2);color:var(--t2);font-size:12px;font-weight:600;
+  box-shadow:var(--shadow);transition:border-color 0.15s ease,color 0.15s ease;flex-shrink:0}
+.theme-btn:hover{border-color:var(--b2);color:var(--t0)}
+.theme-btn:active{transform:scale(0.97)}
+
+/* TABS */
+.tab-nav{display:flex;padding:0 28px;border-top:1px solid var(--b0);overflow-x:auto}
+.tab-btn{display:flex;align-items:center;gap:7px;padding:11px 18px;background:transparent;
+  border:none;border-bottom:2px solid transparent;color:var(--t2);font-size:12.5px;font-weight:600;
+  white-space:nowrap;transition:all 0.18s ease;margin-bottom:-1px}
+.tab-btn:hover{color:var(--t1)}
+.tab-btn.active{color:var(--indigo);border-bottom-color:var(--indigo)}
+
+/* FILTER BAR */
+.filter-bar{display:flex;align-items:center;gap:10px;padding:9px 28px;
+  background:var(--s2);border-top:1px solid var(--b0);overflow-x:auto}
+.fsearch{position:relative;flex-shrink:0}
+.fsearch input{background:var(--s1);border:1px solid var(--b1);border-radius:20px;
+  padding:6px 14px 6px 30px;color:var(--t0);font-size:12px;width:175px;
+  box-shadow:0 1px 2px rgba(0,0,0,0.04);transition:all 0.2s ease}
+.fsearch input:focus{border-color:var(--indigo);width:210px;box-shadow:0 0 0 3px rgba(91,91,214,0.10)}
+.fsearch input::placeholder{color:var(--t3)}
+.sico{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:13px;pointer-events:none}
+.fsep{width:1px;height:18px;background:var(--b1);flex-shrink:0}
+.flbl{font-size:10px;font-weight:700;letter-spacing:0.10em;text-transform:uppercase;color:var(--t3);white-space:nowrap;flex-shrink:0}
+.fpills{display:flex;gap:5px}
+.pill{padding:4px 11px;border-radius:20px;border:1px solid var(--b1);color:var(--t2);
+  font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;background:var(--s1);
+  transition:all 0.14s ease;user-select:none;box-shadow:0 1px 2px rgba(0,0,0,0.03)}
+.pill:hover{border-color:var(--b2);color:var(--t0)}
+.pill:active{transform:scale(0.96)}
+.pill.pa    {background:rgba(91,91,214,0.10);border-color:rgba(91,91,214,0.28);color:var(--indigo)}
+.pill.pa-red{background:rgba(220,38,38,0.08);border-color:rgba(220,38,38,0.25);color:var(--red)}
+.pill.pa-grn{background:rgba(22,163,74,0.08);border-color:rgba(22,163,74,0.25);color:var(--green)}
+.pill.pa-amb{background:rgba(217,119,6,0.08);border-color:rgba(217,119,6,0.25);color:var(--amber)}
+.pill.pa-ora{background:rgba(234,88,12,0.08);border-color:rgba(234,88,12,0.25);color:var(--orange)}
+.pill.pa-gry{background:rgba(128,128,128,0.08);border-color:var(--b2);color:var(--t1)}
+.pill.pa-pnk{background:rgba(219,39,119,0.08);border-color:rgba(219,39,119,0.28);color:var(--pink)}
+.fcount{font-size:11px;color:var(--t3);white-space:nowrap;flex-shrink:0;margin-left:auto;display:flex;align-items:center;gap:5px}
+.fcount strong{color:var(--t0)}
+.clear-btn{padding:5px 11px;border-radius:20px;border:1px solid var(--b1);background:var(--s1);
+  color:var(--t2);font-size:11px;font-weight:600;white-space:nowrap;flex-shrink:0;transition:all 0.14s ease}
+.clear-btn:hover{border-color:rgba(220,38,38,0.30);color:var(--red);background:rgba(220,38,38,0.05)}
+
+/* LAYOUT */
+.main{max-width:1680px;margin:0 auto;padding:22px 28px;display:flex;flex-direction:column;gap:18px}
+.tab-panel{display:none;flex-direction:column;gap:18px}
+.tab-panel.active{display:flex;animation:fadeUp 0.22s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px}
+.g48{display:grid;grid-template-columns:2fr 3.2fr;gap:18px}
+
+/* CARDS */
+.card{background:var(--s1);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--b0);overflow:hidden}
+.card-h{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 13px;border-bottom:1px solid var(--b0)}
+.card-title{font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--t2)}
+.card-note{font-size:10.5px;color:var(--t3);background:var(--s2);padding:2px 8px;border-radius:5px;border:1px solid var(--b0)}
+.cpad{padding:18px}
+
+/* KPI CARDS */
+.kpi-row{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
+.kpi{background:var(--s1);border-radius:var(--radius);border:1px solid var(--b0);
+  box-shadow:var(--shadow);padding:18px 16px 14px;position:relative;overflow:hidden;
+  transition:transform 0.18s ease,box-shadow 0.18s ease}
+.kpi:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.kpi::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--radius) var(--radius) 0 0}
+.kpi-ind::after{background:linear-gradient(90deg,#5B5BD6,#7C3AED)}
+.kpi-red::after{background:linear-gradient(90deg,#DC2626,#EF4444)}
+.kpi-ora::after{background:linear-gradient(90deg,#EA580C,#FB923C)}
+.kpi-amb::after{background:linear-gradient(90deg,#D97706,#F59E0B)}
+.kpi-pnk::after{background:linear-gradient(90deg,#DB2777,#EC4899)}
+.kpi-pur::after{background:linear-gradient(90deg,#7C3AED,#A855F7)}
+.kpi-lbl{font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--t3);margin-bottom:12px}
+.kpi-val{font-family:var(--mono);font-size:2rem;font-weight:700;color:var(--t0);letter-spacing:-0.03em;line-height:1;margin-bottom:5px}
+.kpi-sub{font-size:10.5px;color:var(--t3)}
+.ring-wrap{position:relative;width:72px;height:72px;margin:2px 0 8px}
+.ring-svg{width:72px;height:72px}
+#health-arc{transition:stroke-dashoffset 1.4s cubic-bezier(0.4,0,0.2,1)}
+.ring-num{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  font-family:var(--mono);font-size:12px;font-weight:700;color:var(--t0)}
+
+/* MAP */
+.map-wrap{background:var(--s1);border-radius:var(--radius);border:1px solid var(--b0);box-shadow:var(--shadow);overflow:hidden}
+.map-hdr{display:flex;align-items:center;justify-content:space-between;padding:15px 20px;border-bottom:1px solid var(--b0)}
+.legend-wrap{display:flex;align-items:center;gap:7px}
+.legend-lbl{font-size:10px;color:var(--t3)}
+.legend-grad{width:110px;height:7px;border-radius:4px;background:linear-gradient(90deg,#D1FAE5,#FDE68A,#FCA5A5,#DC2626)}
+#us-map{width:100%;height:370px;display:block}
+#us-map path{cursor:pointer;transition:opacity 0.12s ease}
+#us-map path:hover{opacity:0.76}
+.map-tooltip{position:fixed;background:#1A1A2E;color:#fff;border-radius:11px;padding:13px 15px;
+  font-size:12px;pointer-events:none;z-index:500;box-shadow:0 8px 32px rgba(0,0,0,0.30);max-width:210px;
+  opacity:0;transition:opacity 0.12s ease}
+.map-tooltip.vis{opacity:1}
+.tt-st{font-size:15px;font-weight:700;margin-bottom:8px}
+.tt-r{display:flex;justify-content:space-between;gap:14px;color:rgba(255,255,255,0.55);line-height:1.9}
+.tt-v{font-family:var(--mono);font-weight:600;color:#fff}
+.sip{background:var(--s2);margin:0 12px 12px;border-radius:var(--radius-sm);
+  padding:13px 15px;border:1px solid var(--b1);display:none;animation:fadeUp 0.18s ease}
+.sip.vis{display:block}
+.sip-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.sip-name{font-size:14px;font-weight:700;color:var(--t0)}
+.sip-clr{font-size:11px;color:var(--indigo);cursor:pointer;padding:3px 9px;border-radius:6px;
+  border:1px solid rgba(91,91,214,0.25);background:rgba(91,91,214,0.06)}
+.sip-clr:hover{background:rgba(91,91,214,0.12)}
+.sip-g{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.sip-s{text-align:center}
+.sip-n{font-family:var(--mono);font-size:1.3rem;font-weight:700;color:var(--t0)}
+.sip-l{font-size:10px;color:var(--t3);margin-top:2px}
+
+/* TABLES */
+.tbl-wrap{overflow:auto;max-height:480px}
+.tbl{width:100%;border-collapse:collapse;font-size:12.5px}
+.tbl thead th{position:sticky;top:0;background:var(--s2);padding:10px 14px;
+  text-align:left;font-size:9.5px;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;
+  color:var(--t3);border-bottom:1px solid var(--b1);white-space:nowrap;z-index:2}
+.tbl thead th.sort{cursor:pointer;user-select:none}.tbl thead th.sort:hover{color:var(--t1)}
+.tbl tbody tr{border-bottom:1px solid var(--b0);cursor:pointer;transition:background 0.10s ease}
+.tbl tbody tr:hover{background:rgba(91,91,214,0.05)}
+.tbl td{padding:10px 14px;vertical-align:middle}
+.tr-sel{background:rgba(91,91,214,0.08) !important;box-shadow:inset 3px 0 0 var(--indigo)}
+.row-hi{background:rgba(220,38,38,0.025)}.row-hi:hover{background:rgba(220,38,38,0.055) !important}
+.row-md{background:rgba(217,119,6,0.02)}.row-md:hover{background:rgba(217,119,6,0.05) !important}
+.row-esc{box-shadow:inset 3px 0 0 var(--pink)}
+.cname{font-weight:600;color:var(--t0);transition:color 0.12s}.tbl tr:hover .cname{color:var(--indigo)}
+.flag{font-size:11px;margin-right:3px}
+.schip{font-family:var(--mono);font-size:10.5px;font-weight:700;color:var(--teal);
+  background:rgba(13,148,136,0.10);padding:3px 8px;border-radius:5px}
+.atxt{color:var(--t2);font-size:12px}
+.ncol{font-family:var(--mono);font-weight:600;color:var(--t0);white-space:nowrap}
+.ntxt{color:var(--t3);font-size:11.5px;max-width:230px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rcol{font-family:var(--mono);font-size:12px;color:var(--t3);text-align:center}
+.rb-wrap{display:flex;align-items:center;gap:7px}
+.rb{height:4px;border-radius:2px;flex-shrink:0}
+.rn{font-family:var(--mono);font-size:10px;color:var(--t2)}
+.empty-st{text-align:center;padding:40px;color:var(--t3);font-size:12.5px}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:5px;
+  font-size:10.5px;font-weight:700;letter-spacing:0.04em;white-space:nowrap}
+.b-grn{background:rgba(22,163,74,0.10);color:#16A34A}
+.b-red{background:rgba(220,38,38,0.10);color:#DC2626}
+.b-amb{background:rgba(217,119,6,0.10);color:#D97706}
+.b-ora{background:rgba(234,88,12,0.10);color:#EA580C}
+.b-gry{background:var(--b0);color:var(--t2)}
+.b-ind{background:rgba(91,91,214,0.10);color:#5B5BD6}
+.b-pnk{background:rgba(219,39,119,0.12);color:#DB2777}
+.b-pulse{animation:blink 1.5s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.4}}
+.xtag{background:rgba(220,38,38,0.09);color:#DC2626;border:1px solid rgba(220,38,38,0.18);
+  border-radius:5px;font-size:9px;padding:2px 7px;font-weight:700}
+
+/* ALERT LISTS */
+.alist{display:flex;flex-direction:column;gap:7px;padding:14px;max-height:320px;overflow:auto}
+.arow{background:var(--s2);border-radius:var(--radius-sm);padding:11px 13px;
+  border-left:3px solid var(--b1);cursor:pointer;transition:background 0.12s ease}
+.arow:hover{background:var(--s3)}
+.arow.ar-red{border-left-color:var(--red)}
+.arow.ar-amb{border-left-color:var(--amber)}
+.arow.ar-pnk{border-left-color:var(--pink)}
+.ahdr{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:3px}
+.aname{font-weight:600;font-size:12.5px;color:var(--t0)}
+.ameta{font-size:11px;color:var(--t3)}
+.empty-a{text-align:center;padding:26px;color:var(--t3);font-size:12px}
+
+/* ANALYST */
+.a-btns{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:2px}
+.a-btn{padding:8px 19px;border-radius:20px;border:1px solid var(--b1);background:var(--s1);
+  color:var(--t2);font-size:12.5px;font-weight:600;box-shadow:var(--shadow);transition:all 0.14s ease}
+.a-btn:hover{border-color:var(--b2);color:var(--t0)}
+.a-btn.active{background:rgba(91,91,214,0.08);border-color:rgba(91,91,214,0.30);color:var(--indigo)}
+.a-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}
+.a-kpi{background:var(--s1);border-radius:var(--radius-sm);border:1px solid var(--b0);box-shadow:var(--shadow);padding:15px 17px}
+.ak-l{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:var(--t3);margin-bottom:7px}
+.ak-v{font-family:var(--mono);font-size:1.85rem;font-weight:700;color:var(--t0)}
+.ak-d .ak-v{color:var(--red)}.ak-s .ak-v{color:var(--green)}
+.a-nbadge{font-size:11px;padding:3px 9px;background:rgba(91,91,214,0.08);
+  border:1px solid rgba(91,91,214,0.22);border-radius:20px;color:var(--indigo);font-weight:600}
+
+/* COUNTY PANEL */
+.p-overlay{position:fixed;inset:0;background:rgba(26,26,46,0.35);
+  backdrop-filter:blur(4px);z-index:800;opacity:0;pointer-events:none;transition:opacity 0.28s ease}
+.p-overlay.open{opacity:1;pointer-events:all}
+.cpanel{position:fixed;bottom:-100%;left:50%;transform:translateX(-50%);
+  width:min(660px,92vw);max-height:88vh;overflow-y:auto;background:var(--s1);
+  border-radius:20px 20px 0 0;border:1px solid var(--b2);border-bottom:none;
+  box-shadow:0 -4px 40px rgba(0,0,0,0.18);
+  transition:bottom 0.36s cubic-bezier(0.4,0,0.2,1);z-index:900}
+.cpanel.open{bottom:0}
+.cp-handle{width:34px;height:4px;border-radius:2px;background:var(--b2);margin:12px auto 0}
+.cp-inner{padding:18px 26px 34px}
+.cp-esc-banner{display:none;align-items:center;gap:8px;background:rgba(219,39,119,0.10);
+  border:1px solid rgba(219,39,119,0.28);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:14px;
+  color:var(--pink);font-size:12.5px;font-weight:700}
+.cp-esc-banner.show{display:flex}
+.cp-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px}
+.cp-cname{font-size:21px;font-weight:700;letter-spacing:-0.02em;color:var(--t0);line-height:1.2}
+.cp-chip{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--teal);
+  background:rgba(13,148,136,0.09);padding:3px 10px;border-radius:7px;margin-top:4px;display:inline-block}
+.cp-close{width:30px;height:30px;border-radius:50%;background:var(--s2);border:1px solid var(--b1);
+  color:var(--t2);font-size:15px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;transition:all 0.13s ease}
+.cp-close:hover{background:var(--s3);color:var(--t0)}
+.cp-gap-row{display:flex;align-items:flex-end;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.cp-gap-n{font-family:var(--mono);font-size:2.8rem;font-weight:700;letter-spacing:-0.03em;line-height:1;color:var(--t0)}
+.cp-bdgs{display:flex;flex-direction:column;gap:4px;padding-bottom:3px}
+.cp-a-row{display:flex;align-items:center;gap:9px;padding:11px 13px;
+  background:var(--s2);border-radius:var(--radius-sm);border:1px solid var(--b0);margin-bottom:13px}
+.a-ava{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
+.cp-aname{font-weight:600;font-size:13px;color:var(--t0)}
+.cp-arole{font-size:11px;color:var(--t3)}
+.cp-ig{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.cp-ib{background:var(--s2);border-radius:var(--radius-sm);padding:12px;border:1px solid var(--b0)}
+.cp-il{font-size:10px;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:var(--t3);margin-bottom:5px}
+.cp-iv{font-size:12.5px;color:var(--t1);line-height:1.5}
+.cp-sbar-bg{height:5px;background:var(--s3);border-radius:3px;overflow:hidden;margin:7px 0 4px}
+.cp-sbar-fill{height:100%;border-radius:3px;transition:width 0.7s ease}
+
+/* TRENDS */
+.baseline{background:var(--s1);border-radius:var(--radius);border:1px solid var(--b0);
+  box-shadow:var(--shadow);padding:44px;text-align:center}
+.bl-icon{font-size:38px;margin-bottom:12px}
+.bl-hed{font-size:13px;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:var(--teal);margin-bottom:8px}
+.bl-body{font-size:13px;color:var(--t2);max-width:460px;margin:0 auto 26px;line-height:1.75}
+.bl-stats{display:flex;justify-content:center;gap:36px;flex-wrap:wrap}
+.bl-s{display:flex;flex-direction:column;align-items:center;gap:3px}
+.bl-n{font-family:var(--mono);font-size:1.9rem;font-weight:700;color:var(--t0)}
+.bl-l{font-size:11px;color:var(--t3)}
+</style>
+</head>
+<body>
+
+<div id="loading-overlay"><div class="spinner"></div><p>Loading live gap data…</p></div>
+
+<header class="header">
+  <div class="hdr-top">
+    <div class="logo-wrap">
+      <div class="logo-icon">◈</div>
+      <div><div class="logo-name">County Gap Tracker</div><div class="logo-sub">Fidelity National Financial</div></div>
+    </div>
+    <div class="hdr-right">
+      <div class="hdr-meta">
+        <div>Source: <strong id="hdr-file">—</strong></div>
+        <div class="fresh-row">
+          <span class="fresh-dot"></span><span id="freshness">—</span>
+          <button class="refresh-btn" id="refresh-btn" title="Refresh now">⟲</button>
+        </div>
+      </div>
+      <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" title="Switch theme">
+        <span class="theme-ico" id="theme-ico">☽</span>
+        <span class="theme-lbl" id="theme-lbl">Dark</span>
+      </button>
+    </div>
+  </div>
+  <div class="tab-nav">
+    <button class="tab-btn active" data-tab="overview" onclick="showTab('overview')">◉ &nbsp;Overview</button>
+    <button class="tab-btn" data-tab="analyst" onclick="showTab('analyst')">◈ &nbsp;Analyst Hub</button>
+    <button class="tab-btn" data-tab="risk" onclick="showTab('risk')">◎ &nbsp;Risk Matrix</button>
+    <button class="tab-btn" data-tab="trends" onclick="showTab('trends')">◷ &nbsp;Trends</button>
+  </div>
+  <div class="filter-bar">
+    <div class="fsearch"><span class="sico">⌕</span><input type="text" id="srch" placeholder="Search county…" oninput="onSearch(this.value)"></div>
+    <div class="fsep"></div><span class="flbl">Analyst</span><div class="fpills" id="fp-analyst"></div>
+    <div class="fsep"></div><span class="flbl">Status</span><div class="fpills" id="fp-status"></div>
+    <div class="fsep"></div><span class="flbl">Volume</span><div class="fpills" id="fp-vol"></div>
+    <div class="fsep"></div><span class="flbl">Flag</span><div class="fpills" id="fp-esc"></div>
+    <button class="clear-btn" onclick="clearAll()">✕ Clear</button>
+    <div class="fcount">Showing <strong id="fcnt">—</strong> counties</div>
+  </div>
+</header>
+
+<main class="main">
+<div id="tab-overview" class="tab-panel active">
+  <div class="kpi-row">
+    <div class="kpi kpi-ind">
+      <div class="kpi-lbl">Portfolio Health</div>
+      <div class="ring-wrap">
+        <svg class="ring-svg" viewBox="0 0 72 72">
+          <circle cx="36" cy="36" r="30" fill="none" stroke="var(--b1)" stroke-width="6"/>
+          <circle id="health-arc" cx="36" cy="36" r="30" fill="none" stroke="#5B5BD6" stroke-width="6"
+            stroke-linecap="round" stroke-dasharray="188.5" stroke-dashoffset="188.5" transform="rotate(-90 36 36)"/>
+        </svg>
+        <div id="kv-health" class="ring-num">—</div>
+      </div>
+      <div class="kpi-sub">% counties clean</div>
+    </div>
+    <div class="kpi kpi-red"><div class="kpi-lbl">Total Open Gaps</div><div id="kv-gaps" class="kpi-val">—</div><div class="kpi-sub">across active counties</div></div>
+    <div class="kpi kpi-ora"><div class="kpi-lbl">Critical Counties</div><div id="kv-crit" class="kpi-val">—</div><div class="kpi-sub">high volume + active</div></div>
+    <div class="kpi kpi-pnk"><div class="kpi-lbl">🚩 Escalated</div><div id="kv-esc" class="kpi-val">—</div><div class="kpi-sub">flagged for escalation</div></div>
+    <div class="kpi kpi-amb"><div class="kpi-lbl">On Hold</div><div id="kv-hold" class="kpi-val">—</div><div class="kpi-sub">flagged in comments</div></div>
+    <div class="kpi kpi-pur"><div class="kpi-lbl">Stale Reviews</div><div id="kv-stale" class="kpi-val">—</div><div class="kpi-sub">30+ days no update</div></div>
+  </div>
+  <div class="g48">
+    <div class="card"><div class="card-h"><span class="card-title">Status Distribution</span></div><div class="cpad" style="height:290px;position:relative"><canvas id="ch-donut"></canvas></div></div>
+    <div class="map-wrap">
+      <div class="map-hdr">
+        <span class="card-title">Interactive Map — click a state to filter</span>
+        <div class="legend-wrap"><span class="legend-lbl">Low</span><div class="legend-grad"></div><span class="legend-lbl">High</span></div>
+      </div>
+      <svg id="us-map" viewBox="0 0 960 580" preserveAspectRatio="xMidYMid meet"></svg>
+      <div class="sip" id="sip">
+        <div class="sip-hdr"><div class="sip-name" id="sip-name">—</div><button class="sip-clr" onclick="clearState()">✕ Clear State</button></div>
+        <div class="sip-g">
+          <div class="sip-s"><div class="sip-n" id="sip-gaps">—</div><div class="sip-l">Total Gaps</div></div>
+          <div class="sip-s"><div class="sip-n" id="sip-cty">—</div><div class="sip-l">Counties</div></div>
+          <div class="sip-s"><div class="sip-n" id="sip-act">—</div><div class="sip-l">Active</div></div>
+          <div class="sip-s"><div class="sip-n" id="sip-cln">—</div><div class="sip-l">Clean</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-h"><span class="card-title">County Detail</span><span class="card-note" id="tbl-badge">— records · click a row to inspect</span></div>
+    <div class="tbl-wrap">
+      <table class="tbl"><thead><tr>
+        <th class="sort" onclick="srt('rank')">#</th><th class="sort" onclick="srt('county')">County</th>
+        <th>State</th><th>Analyst</th><th class="sort" onclick="srt('gaps')">Gaps ↓</th>
+        <th>Volume</th><th>Status</th><th class="sort" onclick="srt('risk')">Risk</th>
+        <th class="sort" onclick="srt('days_stale')">Last Review</th><th>Notes</th>
+      </tr></thead><tbody id="main-tb"></tbody></table>
+    </div>
+  </div>
+  <div class="g3">
+    <div class="card" style="border-top:2px solid var(--pink)"><div class="card-h"><span class="card-title">🚩 Escalated Counties</span></div><div id="esc-list" class="alist"></div></div>
+    <div class="card" style="border-top:2px solid var(--red)"><div class="card-h"><span class="card-title">⛔ Counties On Hold</span></div><div id="hold-list" class="alist"></div></div>
+    <div class="card" style="border-top:2px solid var(--amber)"><div class="card-h"><span class="card-title">⏰ Stale &gt;30 days</span></div><div id="stale-list" class="alist"></div></div>
+  </div>
+</div>
+
+<div id="tab-analyst" class="tab-panel">
+  <div class="a-btns" id="a-btns"></div>
+  <div class="a-kpi-row">
+    <div class="a-kpi"><div class="ak-l">Counties Assigned</div><div class="ak-v" id="ak-tot">—</div></div>
+    <div class="a-kpi"><div class="ak-l">Total Gap Count</div><div class="ak-v" id="ak-gaps">—</div></div>
+    <div class="a-kpi ak-d"><div class="ak-l">Active Gap Counties</div><div class="ak-v" id="ak-act">—</div></div>
+    <div class="a-kpi ak-s"><div class="ak-l">Clean Counties</div><div class="ak-v" id="ak-cln">—</div></div>
+  </div>
+  <div class="g2">
+    <div class="card"><div class="card-h"><span class="card-title">Team Workload by Status</span></div><div class="cpad" style="height:280px;position:relative"><canvas id="ch-wl"></canvas></div></div>
+    <div class="card">
+      <div class="card-h"><span class="card-title">Active Queue</span><span id="a-badge" class="a-nbadge">—</span></div>
+      <div class="tbl-wrap" style="max-height:280px">
+        <table class="tbl"><thead><tr><th>County</th><th>State</th><th>Gaps</th><th>Volume</th><th>Action</th><th>Notes</th><th>Last Review</th></tr></thead>
+        <tbody id="q-tb"></tbody></table>
+      </div>
+    </div>
+  </div>
+  <div class="card"><div class="card-h"><span class="card-title">Analyst Gap Exposure</span></div><div class="cpad" style="height:250px;position:relative"><canvas id="ch-aexp"></canvas></div></div>
+</div>
+
+<div id="tab-risk" class="tab-panel">
+  <div class="card">
+    <div class="card-h"><span class="card-title">Risk Matrix — Gap Count vs. Days Since Review</span><span class="card-note">bubble size = volume · thick border = escalated · upper-right = highest risk</span></div>
+    <div class="cpad" style="height:420px;position:relative"><canvas id="ch-bbl"></canvas></div>
+  </div>
+  <div class="g2">
+    <div class="card"><div class="card-h"><span class="card-title">Gap Type Breakdown</span></div><div class="cpad" style="height:270px;position:relative"><canvas id="ch-gt"></canvas></div></div>
+    <div class="card">
+      <div class="card-h"><span class="card-title">Highest Risk Counties</span></div>
+      <div class="tbl-wrap" style="max-height:270px">
+        <table class="tbl"><thead><tr><th>#</th><th>County</th><th>State</th><th>Gaps</th><th>Status</th><th>Risk Score</th></tr></thead>
+        <tbody id="risk-tb"></tbody></table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="tab-trends" class="tab-panel">
+  <div id="trends-body"><div style="text-align:center;padding:60px;color:var(--t3)">Loading…</div></div>
+</div>
+</main>
+
+<div class="p-overlay" id="p-overlay" onclick="closePanel()"></div>
+<div class="cpanel" id="cpanel">
+  <div class="cp-handle"></div>
+  <div class="cp-inner">
+    <div class="cp-esc-banner" id="cp-esc-banner">🚩 &nbsp;This county is flagged for escalation</div>
+    <div class="cp-top">
+      <div><div class="cp-cname" id="pd-name">—</div><div class="cp-chip" id="pd-state">—</div></div>
+      <button class="cp-close" onclick="closePanel()">✕</button>
+    </div>
+    <div class="cp-gap-row">
+      <div class="cp-gap-n" id="pd-gaps">—</div>
+      <div class="cp-bdgs"><span id="pd-sbdg"></span><span id="pd-vbdg"></span></div>
+    </div>
+    <div class="cp-a-row"><div class="a-ava" id="pd-ava">?</div>
+      <div><div class="cp-aname" id="pd-an">—</div><div class="cp-arole">Assigned Analyst</div></div>
+    </div>
+    <div class="cp-ig">
+      <div class="cp-ib"><div class="cp-il">Action Required</div><div class="cp-iv" id="pd-act">—</div></div>
+      <div class="cp-ib"><div class="cp-il">Gap Type</div><div class="cp-iv" id="pd-gt">—</div></div>
+      <div class="cp-ib" style="grid-column:1/-1"><div class="cp-il">Notes / Comments</div><div class="cp-iv" id="pd-notes">—</div></div>
+    </div>
+    <div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:10px;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:var(--t3)">Last Reviewed</span>
+        <span style="font-size:12px;font-weight:600;color:var(--t1)" id="pd-date">—</span>
+      </div>
+      <div class="cp-sbar-bg"><div class="cp-sbar-fill" id="pd-sbar"></div></div>
+      <div style="font-size:11px;color:var(--t3)" id="pd-slbl">—</div>
+    </div>
+    <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
+      <span style="font-size:10px;color:var(--t3)">Code:</span>
+      <span style="font-family:var(--mono);font-size:11px;color:var(--t2)" id="pd-code">—</span>
+    </div>
+  </div>
+</div>
+<div class="map-tooltip" id="mtt"></div>
+<script>
+/* ── DATA STATE (populated async via fetch, not embedded) ──────── */
+let D=null, KPI=null, HIST=[], ALL=[];
+const POLL_INTERVAL_MS = 120000;   // 2 minutes — kept gentle since the source is edited by several people concurrently
+let lastFetchTime = null;
+
+async function loadData(isPoll){
+  try{
+    const res = await fetch('data.json?t='+Date.now(), {cache:'no-store'});
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const payload = await res.json();
+    applyData(payload, isPoll);
+  }catch(e){
+    console.warn('Data fetch failed', e);
+    const el=document.getElementById('freshness');
+    if(el) el.textContent='Refresh failed — showing last known data';
+  }
+}
+
+function applyData(payload){
+  const isFirst = (D===null);
+  D=payload; KPI=payload.kpis; HIST=payload.history||[]; ALL=payload.records;
+  lastFetchTime = new Date();
+  if(isFirst){
+    document.getElementById('loading-overlay').style.display='none';
+    updateThemeBtn(); applyChartDefaults();
+    document.getElementById('hdr-file').textContent=(D.meta||{}).file||'—';
+    buildFilterPills();
+    refresh();
+    initMap();
+  }else{
+    document.getElementById('hdr-file').textContent=(D.meta||{}).file||'—';
+    refresh();
+    if(tabInited['analyst']) refreshAnalystSelection();
+    if(tabInited['risk'])    refreshRiskTab(getFiltered());
+    if(tabInited['trends'])  renderTrends();
+    if(mapInited)            refreshMapColors();
+  }
+  updateFreshnessLabel();
+}
+
+function updateFreshnessLabel(){
+  const el=document.getElementById('freshness');
+  if(!el||!lastFetchTime) return;
+  const secs=Math.floor((Date.now()-lastFetchTime.getTime())/1000);
+  if(secs<5) el.textContent='Updated just now';
+  else if(secs<60) el.textContent='Updated '+secs+'s ago';
+  else el.textContent='Updated '+Math.floor(secs/60)+'m ago';
+}
+setInterval(updateFreshnessLabel, 1000);
+setInterval(()=>loadData(true), POLL_INTERVAL_MS);
+document.getElementById('refresh-btn').addEventListener('click', ()=>loadData(true));
+document.addEventListener('DOMContentLoaded', ()=>loadData(false));
+
+/* ── CONSTANTS ────────────────────────────────────────────────── */
+const SC={'Active gaps':'#DC2626','Clean':'#16A34A','Monitoring':'#D97706','Pending':'#EA580C','Inactive':'#6B7280','Unknown':'#6B7280'};
+const AC=['#5B5BD6','#0D9488','#D97706','#DC2626','#7C3AED','#EA580C'];
+const AVATARS={'Alexa':'#5B5BD6','Dee':'#0D9488','Ethan':'#EA580C','Jessica':'#DB2777','Kaisey':'#D97706'};
+const FIPS={'01':'AL','02':'AK','04':'AZ','05':'AR','06':'CA','08':'CO','09':'CT','10':'DE','11':'DC','12':'FL','13':'GA','15':'HI','16':'ID','17':'IL','18':'IN','19':'IA','20':'KS','21':'KY','22':'LA','23':'ME','24':'MD','25':'MA','26':'MI','27':'MN','28':'MS','29':'MO','30':'MT','31':'NE','32':'NV','33':'NH','34':'NJ','35':'NM','36':'NY','37':'NC','38':'ND','39':'OH','40':'OK','41':'OR','42':'PA','44':'RI','45':'SC','46':'SD','47':'TN','48':'TX','49':'UT','50':'VT','51':'VA','53':'WA','54':'WV','55':'WI','56':'WY'};
+
+/* ── THEME SYSTEM ─────────────────────────────────────────────── */
+function isDark(){return document.documentElement.getAttribute('data-theme')==='dark';}
+function themeChartColors(){
+  const dark=isDark();
+  return{axis:dark?'rgba(255,255,255,0.35)':'rgba(26,26,46,0.40)',grid:dark?'rgba(255,255,255,0.04)':'rgba(0,0,0,0.06)',
+    ttBg:'#1A1A2E',ttTitle:'#FFFFFF',ttBody:'rgba(255,255,255,0.65)',ttBrd:dark?'rgba(255,255,255,0.08)':'rgba(255,255,255,0.10)',
+    legend:dark?'rgba(255,255,255,0.50)':'rgba(26,26,46,0.45)'};
+}
+function applyChartDefaults(){
+  const c=themeChartColors();
+  Chart.defaults.color=c.axis; Chart.defaults.borderColor=c.grid;
+  Chart.defaults.plugins.tooltip.backgroundColor=c.ttBg; Chart.defaults.plugins.tooltip.titleColor=c.ttTitle;
+  Chart.defaults.plugins.tooltip.bodyColor=c.ttBody; Chart.defaults.plugins.tooltip.borderColor=c.ttBrd;
+  Chart.defaults.plugins.tooltip.borderWidth=1; Chart.defaults.plugins.tooltip.padding=12; Chart.defaults.plugins.tooltip.cornerRadius=10;
+  Chart.defaults.font.family="-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif";
+}
+function updateThemeBtn(){
+  const dark=isDark();
+  document.getElementById('theme-ico').textContent=dark?'☀':'☽';
+  document.getElementById('theme-lbl').textContent=dark?'Light':'Dark';
+}
+function toggleTheme(){
+  const newTheme=isDark()?'light':'dark';
+  document.body.classList.add('theme-transitioning');
+  document.documentElement.setAttribute('data-theme',newTheme);
+  localStorage.setItem('gap-theme',newTheme);
+  updateThemeBtn(); applyChartDefaults();
+  const recs=getFiltered();
+  updateDonut(recs);
+  if(tabInited['analyst']){buildWorkloadChart(KPI.analysts||[]);buildAnalystExpChart(KPI.analysts||[]);}
+  if(tabInited['risk']) refreshRiskTab(recs);
+  if(tabInited['trends']) renderTrends();
+  refreshMapColors();
+  setTimeout(()=>document.body.classList.remove('theme-transitioning'),400);
+}
+
+/* ── CHART REGISTRY / UTILS ──────────────────────────────────── */
+const _ch={};
+function mkChart(id,cfg){const el=document.getElementById(id);if(!el)return;if(_ch[id])_ch[id].destroy();_ch[id]=new Chart(el,cfg);}
+const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const trunc=(s,n=44)=>s&&s.length>n?s.slice(0,n)+'…':(s||'—');
+function animN(el,end,ms,fn){if(!el)return;ms=ms||1100;const t0=performance.now();function tick(t){const p=Math.min((t-t0)/ms,1);const e=1-Math.pow(1-p,3);const v=Math.round(end*e);el.textContent=fn?fn(v):v.toLocaleString();if(p<1)requestAnimationFrame(tick);}requestAnimationFrame(tick);}
+function sBadge(s){const c={'Active gaps':'b-red','Clean':'b-grn','Monitoring':'b-amb','Pending':'b-ora','Inactive':'b-gry'}[s]||'b-gry';return '<span class="badge '+c+'">'+esc(s||'—')+'</span>';}
+function vBadge(v){const c={'High':'b-red','Medium':'b-amb','Low':'b-grn'}[v]||'b-gry';return '<span class="badge '+c+'">'+esc(v||'—')+'</span>';}
+function dBadge(d){if(!d||d>=999)return '<span class="badge b-gry">—</span>';const c=d<8?'b-grn':d<31?'b-amb':d<61?'b-ora':'b-red';return '<span class="badge '+c+'">'+d+'d ago</span>';}
+function xTag(g){if(g>=500000)return '<span class="xtag b-pulse">EXTREME</span> ';if(g>=100000)return '<span class="xtag">CRITICAL</span> ';return '';}
+function eFlag(r){return r.escalated?'<span class="flag" title="Escalated">🚩</span>':'';}
+function rcColor(r){return r>74?'#DC2626':r>49?'#EA580C':r>24?'#D97706':'#16A34A';}
+function rcBar(r,w){w=w||60;return '<div class="rb-wrap"><div class="rb" style="width:'+Math.round(r/100*w)+'px;background:'+rcColor(r)+'"></div><span class="rn">'+r+'</span></div>';}
+
+/* ── FILTER STATE ─────────────────────────────────────────────── */
+let F={state:null,analyst:null,statuses:[],volumes:[],escalatedOnly:false,search:''};
+let sortKey='gaps',sortDir=-1,selCounty=null,mapInited=false,byState={};
+const tabInited={};
+
+function getFiltered(){
+  return ALL.filter(r=>{
+    if(F.state&&r.state!==F.state)return false;
+    if(F.analyst&&r.analyst!==F.analyst)return false;
+    if(F.statuses.length&&!F.statuses.includes(r.status))return false;
+    if(F.volumes.length&&!F.volumes.includes(r.volume))return false;
+    if(F.escalatedOnly&&!r.escalated)return false;
+    if(F.search&&!r.county.toLowerCase().includes(F.search.toLowerCase())&&!r.state.toLowerCase().includes(F.search.toLowerCase()))return false;
+    return true;
+  });
+}
+
+function refresh(){
+  const recs=getFiltered();
+  document.getElementById('fcnt').textContent=recs.length;
+  updateKPIs(recs);updateMainTable(recs);updateDonut(recs);updateAlertLists(recs);
+  if(tabInited['risk']) refreshRiskTab(recs);
+}
+
+function onSearch(v){F.search=v;refresh();}
+function clearState(){F.state=null;refreshMapColors();document.getElementById('sip').classList.remove('vis');refresh();}
+function clearAll(){
+  F={state:null,analyst:null,statuses:[],volumes:[],escalatedOnly:false,search:''};
+  document.getElementById('srch').value='';
+  document.querySelectorAll('.pill').forEach(p=>p.className='pill');
+  document.getElementById('sip').classList.remove('vis');
+  refreshMapColors();
+  refresh();
+}
+function togglePill(el,key,val,ac){
+  ac=ac||'pa';
+  if(key==='analyst'){F.analyst=F.analyst===val?null:val;el.classList.toggle(ac,F.analyst===val);}
+  else if(key==='escalatedOnly'){F.escalatedOnly=!F.escalatedOnly;el.classList.toggle(ac,F.escalatedOnly);}
+  else{const i=F[key].indexOf(val);if(i>-1)F[key].splice(i,1);else F[key].push(val);el.classList.toggle(ac,F[key].includes(val));}
+  refresh();
+}
+
+function buildFilterPills(){
+  const ab=document.getElementById('fp-analyst');
+  (KPI.analysts||[]).forEach(a=>{const b=document.createElement('button');b.className='pill';b.textContent=a;b.onclick=()=>togglePill(b,'analyst',a,'pa');ab.appendChild(b);});
+  const sb=document.getElementById('fp-status');
+  [['Active gaps','pa-red'],['Clean','pa-grn'],['Monitoring','pa-amb'],['Pending','pa-ora'],['Inactive','pa-gry']].forEach(([s,c])=>{
+    const b=document.createElement('button');b.className='pill';b.textContent=s;b.onclick=()=>togglePill(b,'statuses',s,c);sb.appendChild(b);});
+  const vb=document.getElementById('fp-vol');
+  [['High','pa-red'],['Medium','pa-amb'],['Low','pa-grn']].forEach(([v,c])=>{
+    const b=document.createElement('button');b.className='pill';b.textContent=v;b.onclick=()=>togglePill(b,'volumes',v,c);vb.appendChild(b);});
+  const eb=document.getElementById('fp-esc');
+  const fb=document.createElement('button');fb.className='pill';fb.textContent='🚩 Escalated only';fb.onclick=()=>togglePill(fb,'escalatedOnly',true,'pa-pnk');eb.appendChild(fb);
+}
+
+/* ── TAB SYSTEM ───────────────────────────────────────────────── */
+function showTab(id){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===id));
+  document.getElementById('tab-'+id).classList.add('active');
+  if(!tabInited[id]){tabInited[id]=true;
+    if(id==='analyst')initAnalystTab();
+    if(id==='risk')initRiskTab();
+    if(id==='trends')initTrendsTab();
+  }
+}
+
+/* ── KPIs ─────────────────────────────────────────────────────── */
+function updateKPIs(recs){
+  const total=recs.length||1,clean=recs.filter(r=>r.status==='Clean').length;
+  const h=parseFloat((clean/total*100).toFixed(1));
+  setTimeout(()=>{const a=document.getElementById('health-arc');if(a)a.style.strokeDashoffset=188.5*(1-h/100);},100);
+  animN(document.getElementById('kv-health'),h,1200,v=>v+'%');
+  animN(document.getElementById('kv-gaps'),recs.reduce((a,r)=>a+r.gaps,0));
+  animN(document.getElementById('kv-crit'),recs.filter(r=>r.status==='Active gaps'&&r.volume==='High').length,800);
+  animN(document.getElementById('kv-esc'),recs.filter(r=>r.escalated).length,800);
+  animN(document.getElementById('kv-hold'),recs.filter(r=>r.comments&&r.comments.toLowerCase().includes('hold')).length,800);
+  animN(document.getElementById('kv-stale'),recs.filter(r=>r.days_stale>30&&r.days_stale<999&&!['Clean','Inactive'].includes(r.status)).length,800);
+}
+
+/* ── STATUS DONUT ─────────────────────────────────────────────── */
+function updateDonut(recs){
+  const ord=['Clean','Active gaps','Monitoring','Pending','Inactive'],total=recs.length||1;
+  const c=themeChartColors();
+  mkChart('ch-donut',{type:'doughnut',data:{labels:ord,datasets:[{data:ord.map(s=>recs.filter(r=>r.status===s).length),backgroundColor:ord.map(s=>SC[s]),borderWidth:2,borderColor:'var(--s1)',hoverOffset:6}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'68%',
+      plugins:{legend:{position:'bottom',labels:{color:c.legend,padding:14,usePointStyle:true,pointStyleWidth:10}},
+        tooltip:{callbacks:{label:ctx=>' '+ctx.label+': '+ctx.raw+' ('+(ctx.raw/total*100).toFixed(1)+'%)'}}}}});
+}
+
+/* ── MAIN TABLE ───────────────────────────────────────────────── */
+let _tRecs=[];
+function updateMainTable(recs){
+  _tRecs=[...recs].sort((a,b)=>(a[sortKey]>b[sortKey]?1:-1)*sortDir);
+  const medals=['🥇','🥈','🥉'];
+  const tb=document.getElementById('main-tb'),bdg=document.getElementById('tbl-badge');
+  if(bdg)bdg.textContent=recs.length+' records · click a row to inspect';
+  if(!tb)return;
+  if(!recs.length){tb.innerHTML='<tr><td colspan="10" class="empty-st">No counties match the current filters</td></tr>';return;}
+  tb.innerHTML=_tRecs.map((r,i)=>`
+    <tr class="tr-hover ${r.volume==='High'?'row-hi':r.volume==='Medium'?'row-md':''} ${r.escalated?'row-esc':''} ${selCounty&&selCounty.code===r.code?'tr-sel':''}"
+        onclick="openPanel(${JSON.stringify(r).replace(/"/g,'&quot;')})">
+      <td class="rcol">${medals[i]||(i+1)}</td>
+      <td>${eFlag(r)}<span class="cname">${esc(r.county)}</span></td>
+      <td><span class="schip">${esc(r.state)}</span></td>
+      <td class="atxt">${esc(r.analyst)}</td>
+      <td class="ncol">${xTag(r.gaps)}${r.gaps.toLocaleString()}</td>
+      <td>${vBadge(r.volume)}</td>
+      <td>${sBadge(r.status)}</td>
+      <td>${rcBar(r.risk)}</td>
+      <td>${dBadge(r.days_stale)}</td>
+      <td class="ntxt" title="${esc(r.comments||r.action)}">${esc(trunc(r.comments||r.action))}</td>
+    </tr>`).join('');
+}
+function srt(key){if(sortKey===key)sortDir*=-1;else{sortKey=key;sortDir=-1;}updateMainTable(getFiltered());}
+
+/* ── ALERT LISTS ──────────────────────────────────────────────── */
+function updateAlertLists(recs){
+  const esc_=recs.filter(r=>r.escalated).sort((a,b)=>b.gaps-a.gaps);
+  const hold=recs.filter(r=>r.comments&&r.comments.toLowerCase().includes('hold'));
+  const stale=recs.filter(r=>r.days_stale>30&&r.days_stale<999&&!['Clean','Inactive'].includes(r.status)).sort((a,b)=>b.days_stale-a.days_stale);
+
+  const el=document.getElementById('esc-list');
+  if(el)el.innerHTML=!esc_.length?'<div class="empty-a">No counties currently escalated ✓</div>':
+    esc_.slice(0,8).map(r=>`<div class="arow ar-pnk" onclick="openPanel(${JSON.stringify(r).replace(/"/g,'&quot;')})">
+      <div class="ahdr"><span class="aname">${esc(r.county)}, ${esc(r.state)}</span><span class="badge b-pnk">${r.gaps.toLocaleString()}</span></div>
+      <div class="ameta">${esc(r.analyst)} · ${sBadge(r.status)}</div></div>`).join('');
+
+  const hl=document.getElementById('hold-list');
+  if(hl)hl.innerHTML=!hold.length?'<div class="empty-a">No counties on hold ✓</div>':
+    hold.map(r=>`<div class="arow ar-red" onclick="openPanel(${JSON.stringify(r).replace(/"/g,'&quot;')})">
+      <div class="ahdr"><span class="aname">${esc(r.county)}, ${esc(r.state)}</span><span class="badge b-red">${r.gaps.toLocaleString()}</span></div>
+      <div class="ameta">${esc(r.analyst)} · ${esc(trunc(r.comments,50))}</div></div>`).join('');
+
+  const sl=document.getElementById('stale-list');
+  if(sl)sl.innerHTML=!stale.length?'<div class="empty-a">All reviewed within 30 days ✓</div>':
+    stale.slice(0,8).map(r=>`<div class="arow ar-amb" onclick="openPanel(${JSON.stringify(r).replace(/"/g,'&quot;')})">
+      <div class="ahdr"><span class="aname">${esc(r.county)}, ${esc(r.state)}</span>${dBadge(r.days_stale)}</div>
+      <div class="ameta">${esc(r.analyst)} · ${sBadge(r.status)}</div></div>`).join('');
+}
+
+/* ── US MAP ───────────────────────────────────────────────────── */
+function getMapEmptyColor(){return isDark()?'#1A1A28':'#EBEBF4';}
+function getMapStrokeColor(){return isDark()?'rgba(255,255,255,0.07)':'rgba(255,255,255,0.55)';}
+
+async function initMap(){
+  const tt=document.getElementById('mtt');
+  try{
+    const us=await d3.json('https://urldefense.com/v3/__https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json__;!!LyAuvDCm-53-y27wV7iK5g!15OPDK2beOFhnwxYqGdE-3SX1DaSU3UqjUXVBBBxlTKWaKPFd7pISjM8R2op9yeujVbQ6_uFj7c2vY9omXDkQj4xwkKaAG7cXZBkyA$');
+    const svg=d3.select('#us-map');
+    const proj=d3.geoAlbersUsa().scale(1280).translate([480,300]);
+    const path=d3.geoPath().projection(proj);
+    const states=topojson.feature(us,us.objects.states);
+    (KPI.state_list||[]).forEach(s=>{byState[s.state]=s;});
+    const logSc=d3.scaleLog().domain([1,2000000]).range([0,1]).clamp(true);
+    const interp=d3.interpolateRgbBasis(['#D1FAE5','#A7F3D0','#FDE68A','#FCA5A5','#DC2626']);
+    function stateColor(abbr){const s=byState[abbr];if(!s||s.gaps<=0)return getMapEmptyColor();return interp(logSc(s.gaps));}
+    svg.selectAll('path').data(states.features).join('path')
+      .attr('d',path)
+      .attr('fill',d=>stateColor(FIPS[String(d.id).padStart(2,'0')]))
+      .attr('stroke',getMapStrokeColor())
+      .attr('stroke-width',0.6)
+      .on('click',function(event,d){
+        const abbr=FIPS[String(d.id).padStart(2,'0')];if(!abbr)return;
+        F.state=(F.state===abbr)?null:abbr;
+        refreshMapColors();
+        if(F.state){
+          const sp=byState[abbr]||{gaps:0,counties:0,active:0,clean:0};
+          document.getElementById('sip-name').textContent=abbr;
+          document.getElementById('sip-gaps').textContent=(sp.gaps||0).toLocaleString();
+          document.getElementById('sip-cty').textContent=sp.counties||0;
+          document.getElementById('sip-act').textContent=sp.active||0;
+          document.getElementById('sip-cln').textContent=sp.clean||0;
+          document.getElementById('sip').classList.add('vis');
+        }else{
+          document.getElementById('sip').classList.remove('vis');
+        }
+        refresh();
+      })
+      .on('mousemove',function(event,d){
+        const abbr=FIPS[String(d.id).padStart(2,'0')];if(!abbr)return;
+        const sp=byState[abbr];
+        tt.className='map-tooltip vis';
+        tt.style.left=(event.clientX+14)+'px';tt.style.top=(event.clientY-10)+'px';
+        tt.innerHTML=`<div class="tt-st">${abbr}</div>`+(sp?`
+          <div class="tt-r"><span>Total Gaps</span><span class="tt-v">${(sp.gaps||0).toLocaleString()}</span></div>
+          <div class="tt-r"><span>Counties</span><span class="tt-v">${sp.counties||0}</span></div>
+          <div class="tt-r"><span>Active</span><span class="tt-v" style="color:#F87171">${sp.active||0}</span></div>
+          <div class="tt-r"><span>Clean</span><span class="tt-v" style="color:#34D399">${sp.clean||0}</span></div>`
+          :'<div class="tt-r" style="opacity:0.5">No data</div>');
+      })
+      .on('mouseleave',()=>{tt.className='map-tooltip';});
+    mapInited=true;
+  }catch(e){
+    const wrap=document.querySelector('.map-body')||document.getElementById('us-map').parentElement;
+    wrap.insertAdjacentHTML('beforeend','<div style="text-align:center;padding:32px;color:var(--t3);font-size:12px">Map requires internet connection</div>');
+  }
+}
+
+function refreshMapColors(){
+  if(!mapInited)return;
+  byState={};(KPI.state_list||[]).forEach(s=>{byState[s.state]=s;});
+  const logSc=d3.scaleLog().domain([1,2000000]).range([0,1]).clamp(true);
+  const interp=d3.interpolateRgbBasis(['#D1FAE5','#A7F3D0','#FDE68A','#FCA5A5','#DC2626']);
+  const emptyCol=getMapEmptyColor(),strokeCol=getMapStrokeColor();
+  d3.selectAll('#us-map path').each(function(d){
+    const abbr=FIPS[String(d.id).padStart(2,'0')];
+    const sp=byState[abbr];
+    const fill=(!sp||sp.gaps<=0)?emptyCol:interp(logSc(sp.gaps));
+    const isSel=F.state&&abbr===F.state;
+    d3.select(this).attr('fill',fill).attr('stroke',isSel?'#5B5BD6':strokeCol).attr('stroke-width',isSel?2.5:0.6);
+  });
+}
+
+/* ── ANALYST TAB ──────────────────────────────────────────────── */
+let _selectedAnalyst=null;
+function initAnalystTab(){
+  const analysts=KPI.analysts||[];
+  const box=document.getElementById('a-btns');
+  if(box)box.innerHTML=analysts.map((a,i)=>`<button class="a-btn${i===0?' active':''}" data-a="${esc(a)}" onclick="selAnalyst('${esc(a)}')">${esc(a)}</button>`).join('');
+  buildWorkloadChart(analysts);buildAnalystExpChart(analysts);
+  if(analysts.length){_selectedAnalyst=analysts[0];selAnalyst(analysts[0]);}
+}
+function refreshAnalystSelection(){
+  buildWorkloadChart(KPI.analysts||[]);buildAnalystExpChart(KPI.analysts||[]);
+  if(_selectedAnalyst) selAnalyst(_selectedAnalyst);
+}
+function buildWorkloadChart(analysts){
+  const c=themeChartColors();
+  mkChart('ch-wl',{type:'bar',data:{labels:analysts,datasets:[
+    {label:'Active',data:analysts.map(a=>(KPI.by_analyst[a]||{}).active||0),backgroundColor:'#DC2626'},
+    {label:'Monitoring',data:analysts.map(a=>(KPI.by_analyst[a]||{}).monitoring||0),backgroundColor:'#D97706'},
+    {label:'Pending',data:analysts.map(a=>(KPI.by_analyst[a]||{}).pending||0),backgroundColor:'#EA580C'},
+    {label:'Clean',data:analysts.map(a=>(KPI.by_analyst[a]||{}).clean||0),backgroundColor:'#16A34A'},
+  ]},options:{responsive:true,maintainAspectRatio:false,
+    scales:{x:{stacked:true,ticks:{color:c.axis},grid:{display:false}},y:{stacked:true,ticks:{color:c.axis},grid:{color:c.grid}}},
+    plugins:{legend:{position:'bottom',labels:{color:c.legend,padding:14,usePointStyle:true}}}}});
+}
+function buildAnalystExpChart(analysts){
+  const c=themeChartColors();
+  mkChart('ch-aexp',{type:'doughnut',data:{labels:analysts,datasets:[{data:analysts.map(a=>Math.max((KPI.by_analyst[a]||{}).gaps||0,1)),backgroundColor:AC,borderWidth:2,borderColor:'var(--s1)'}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'58%',
+      plugins:{legend:{position:'bottom',labels:{color:c.legend,padding:12,usePointStyle:true}},
+        tooltip:{callbacks:{label:ctx=>' '+ctx.label+': '+(ctx.raw).toLocaleString()+' gaps'}}}}});
+}
+function selAnalyst(name){
+  _selectedAnalyst=name;
+  document.querySelectorAll('.a-btn').forEach(b=>b.classList.toggle('active',b.dataset.a===name));
+  const lbl=document.getElementById('a-badge');if(lbl)lbl.textContent=name;
+  const a=KPI.by_analyst[name]||{};
+  const sv=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=(v||0).toLocaleString();};
+  sv('ak-tot',a.total);sv('ak-gaps',a.gaps);sv('ak-act',a.active);sv('ak-cln',a.clean);
+  const queue=(KPI.analyst_queues||{})[name]||[];
+  const tb=document.getElementById('q-tb');if(!tb)return;
+  tb.innerHTML=!queue.length?`<tr><td colspan="7" class="empty-st">No active gaps for ${esc(name)} 🎉</td></tr>`:
+    queue.map(r=>`<tr class="tr-hover ${r.volume==='High'?'row-hi':r.volume==='Medium'?'row-md':''} ${r.escalated?'row-esc':''}" onclick="openPanel(${JSON.stringify(r).replace(/"/g,'&quot;')})">
+      <td>${eFlag(r)}<span class="cname">${esc(r.county)}</span></td><td><span class="schip">${esc(r.state)}</span></td>
+      <td class="ncol">${xTag(r.gaps)}${r.gaps.toLocaleString()}</td>
+      <td>${vBadge(r.volume)}</td>
+      <td class="ntxt" title="${esc(r.action)}">${esc(trunc(r.action))}</td>
+      <td class="ntxt" title="${esc(r.comments)}">${esc(trunc(r.comments))}</td>
+      <td>${dBadge(r.days_stale)}</td></tr>`).join('');
+}
+
+/* ── RISK TAB ─────────────────────────────────────────────────── */
+function initRiskTab(){refreshRiskTab(getFiltered());}
+function refreshRiskTab(recs){
+  const c=themeChartColors();
+  const active=recs.filter(r=>r.gaps>0&&r.status!=='Inactive');
+  function bdata(arr){return arr.map(r=>({x:Math.min(r.days_stale<999?r.days_stale:90,90),y:r.gaps,r:r.volume==='High'?14:r.volume==='Medium'?9:5,_r:r}));}
+  function mkDataset(arr,bg,bd){return{data:bdata(arr),backgroundColor:bg,borderColor:bd,
+    borderWidth:arr.map(()=>1.5),
+    pointStyle:'circle'};}
+  const high=active.filter(r=>r.volume==='High'), med=active.filter(r=>r.volume==='Medium'), low=active.filter(r=>r.volume==='Low');
+  function widths(arr){return bdata(arr).map(d=>d._r.escalated?4:1.5);}
+  function borderCols(arr,fallback){return bdata(arr).map(d=>d._r.escalated?'#DB2777':fallback);}
+  mkChart('ch-bbl',{type:'bubble',data:{datasets:[
+    {label:'High Volume',data:bdata(high),backgroundColor:'rgba(220,38,38,0.50)',borderColor:borderCols(high,'#DC2626'),borderWidth:widths(high)},
+    {label:'Medium Volume',data:bdata(med),backgroundColor:'rgba(217,119,6,0.40)',borderColor:borderCols(med,'#D97706'),borderWidth:widths(med)},
+    {label:'Low Volume',data:bdata(low),backgroundColor:'rgba(22,163,74,0.30)',borderColor:borderCols(low,'#16A34A'),borderWidth:widths(low)},
+  ]},options:{responsive:true,maintainAspectRatio:false,
+    scales:{
+      x:{title:{display:true,text:'Days Since Last Review',color:c.axis,font:{size:11}},ticks:{color:c.axis},grid:{color:c.grid},max:95},
+      y:{type:'logarithmic',title:{display:true,text:'Total Gaps (log scale)',color:c.axis,font:{size:11}},ticks:{color:c.axis,callback:v=>v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?(v/1e3).toFixed(0)+'K':v},grid:{color:c.grid}},
+    },
+    plugins:{legend:{position:'bottom',labels:{color:c.legend,padding:14,usePointStyle:true}},
+      tooltip:{callbacks:{
+        title:items=>{const r=items[0].raw._r;return r?(r.escalated?'🚩 ':'')+r.county+', '+r.state:'';},
+        label:ctx=>{const r=ctx.raw._r;if(!r)return'';return[' Gaps: '+r.gaps.toLocaleString(),' Days stale: '+(r.days_stale<999?r.days_stale:'Unknown'),' Analyst: '+r.analyst,' Status: '+r.status];}}}},
+    onClick:(e,items)=>{if(items.length){const r=items[0].element.$context.raw._r;if(r)openPanel(r);}},
+  }});
+  const gtRaw=Object.entries(KPI.gap_types||{}).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  if(gtRaw.length)mkChart('ch-gt',{type:'bar',data:{labels:gtRaw.map(e=>e[0]),datasets:[{label:'Counties',data:gtRaw.map(e=>e[1]),backgroundColor:'#5B5BD6',borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
+      scales:{x:{ticks:{color:c.axis},grid:{color:c.grid}},y:{ticks:{color:c.axis,font:{size:11}},grid:{display:false}}},
+      plugins:{legend:{display:false}}}});
+  const topRisk=[...recs].sort((a,b)=>b.risk-a.risk).slice(0,12);
+  const rb=document.getElementById('risk-tb');
+  if(rb)rb.innerHTML=topRisk.map((r,i)=>`<tr class="tr-hover ${r.escalated?'row-esc':''}" onclick="openPanel(${JSON.stringify(r).replace(/"/g,'&quot;')})">
+    <td class="rcol">${i+1}</td><td>${eFlag(r)}<span class="cname">${esc(r.county)}</span></td>
+    <td><span class="schip">${esc(r.state)}</span></td>
+    <td class="ncol">${xTag(r.gaps)}${r.gaps.toLocaleString()}</td>
+    <td>${sBadge(r.status)}</td>
+    <td><div class="rb-wrap"><div class="rb" style="width:${Math.round(r.risk/100*80)}px;background:${rcColor(r.risk)}"></div><span class="rn" style="color:${rcColor(r.risk)}">${r.risk}</span></div></td>
+    </tr>`).join('');
+}
+
+/* ── TRENDS TAB ───────────────────────────────────────────────── */
+function initTrendsTab(){renderTrends();}
+function renderTrends(){
+  const tc=document.getElementById('trends-body');if(!tc)return;
+  if(!HIST||HIST.length<2){
+    const s=HIST[0]||{};
+    tc.innerHTML=`<div class="baseline"><div class="bl-icon">📍</div>
+      <div class="bl-hed">Baseline Established</div>
+      <div style="font-size:12px;color:var(--t3);margin-bottom:10px">${s.date||'Today'}</div>
+      <div class="bl-body">Trends appear once a second calendar day of data has been captured. Since the watcher updates throughout the day, today's snapshot keeps refining — check back tomorrow for the first trend line.</div>
+      <div class="bl-stats">
+        <div class="bl-s"><span class="bl-n">${(s.total_gaps||0).toLocaleString()}</span><span class="bl-l">Total Gaps</span></div>
+        <div class="bl-s"><span class="bl-n">${s.active||0}</span><span class="bl-l">Active</span></div>
+        <div class="bl-s"><span class="bl-n">${s.clean||0}</span><span class="bl-l">Clean</span></div>
+        <div class="bl-s"><span class="bl-n">${s.escalated||0}</span><span class="bl-l">Escalated</span></div>
+      </div></div>`;return;
+  }
+  tc.innerHTML=`
+    <div class="g2">
+      <div class="card"><div class="card-h"><span class="card-title">Total Gaps Over Time</span></div><div class="cpad" style="height:260px;position:relative"><canvas id="ch-t1"></canvas></div></div>
+      <div class="card"><div class="card-h"><span class="card-title">County Status Over Time</span></div><div class="cpad" style="height:260px;position:relative"><canvas id="ch-t2"></canvas></div></div>
+    </div>
+    <div class="g2">
+      <div class="card"><div class="card-h"><span class="card-title">Escalations Over Time</span></div><div class="cpad" style="height:240px;position:relative"><canvas id="ch-t4"></canvas></div></div>
+      <div class="card"><div class="card-h"><span class="card-title">Analyst Gaps Over Time</span></div><div class="cpad" style="height:240px;position:relative"><canvas id="ch-t3"></canvas></div></div>
+    </div>`;
+  const labels=HIST.map(h=>h.date);
+  const c=themeChartColors();
+  const sc={x:{ticks:{color:c.axis},grid:{color:c.grid}},y:{ticks:{color:c.axis,callback:v=>v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?(v/1e3).toFixed(0)+'K':v},grid:{color:c.grid}}};
+  mkChart('ch-t1',{type:'line',data:{labels,datasets:[{label:'Total Gaps',data:HIST.map(h=>h.total_gaps),borderColor:'#5B5BD6',backgroundColor:'rgba(91,91,214,0.07)',fill:true,tension:0.4,pointBackgroundColor:'#5B5BD6',pointRadius:5}]},
+    options:{responsive:true,maintainAspectRatio:false,scales:sc,plugins:{legend:{labels:{color:c.legend}}}}});
+  mkChart('ch-t2',{type:'line',data:{labels,datasets:[
+    {label:'Active',data:HIST.map(h=>h.active),borderColor:'#DC2626',backgroundColor:'rgba(220,38,38,0.06)',fill:true,tension:0.4,pointRadius:4},
+    {label:'Clean',data:HIST.map(h=>h.clean),borderColor:'#16A34A',backgroundColor:'rgba(22,163,74,0.06)',fill:true,tension:0.4,pointRadius:4},
+    {label:'Monitoring',data:HIST.map(h=>h.monitoring),borderColor:'#D97706',fill:false,tension:0.4,pointRadius:3,borderDash:[4,3]},
+  ]},options:{responsive:true,maintainAspectRatio:false,scales:sc,plugins:{legend:{position:'bottom',labels:{color:c.legend,padding:12,usePointStyle:true}}}}});
+  mkChart('ch-t4',{type:'line',data:{labels,datasets:[{label:'Escalated Counties',data:HIST.map(h=>h.escalated||0),borderColor:'#DB2777',backgroundColor:'rgba(219,39,119,0.08)',fill:true,tension:0.4,pointBackgroundColor:'#DB2777',pointRadius:5}]},
+    options:{responsive:true,maintainAspectRatio:false,scales:sc,plugins:{legend:{labels:{color:c.legend}}}}});
+  const analysts=KPI.analysts||[];
+  mkChart('ch-t3',{type:'line',data:{labels,datasets:analysts.map((a,i)=>({label:a,data:HIST.map(h=>(h.by_analyst||{})[a]?h.by_analyst[a].gaps||0:0),borderColor:AC[i%AC.length],fill:false,tension:0.4,pointRadius:4}))},
+    options:{responsive:true,maintainAspectRatio:false,scales:sc,plugins:{legend:{position:'bottom',labels:{color:c.legend,padding:12,usePointStyle:true}}}}});
+}
+
+/* ── COUNTY DETAIL PANEL ──────────────────────────────────────── */
+function openPanel(r){
+  if(typeof r==='string')r=JSON.parse(r);
+  selCounty=r;
+  document.getElementById('cp-esc-banner').classList.toggle('show',!!r.escalated);
+  document.getElementById('pd-name').textContent=r.county;
+  document.getElementById('pd-state').textContent=r.state;
+  document.getElementById('pd-gaps').textContent=r.gaps.toLocaleString();
+  document.getElementById('pd-sbdg').innerHTML=sBadge(r.status);
+  document.getElementById('pd-vbdg').innerHTML=vBadge(r.volume);
+  document.getElementById('pd-act').textContent=r.action||'None specified';
+  document.getElementById('pd-gt').textContent=r.gap_type||'Unknown';
+  document.getElementById('pd-notes').textContent=r.comments||'No notes';
+  document.getElementById('pd-an').textContent=r.analyst;
+  document.getElementById('pd-code').textContent=r.code||'—';
+  document.getElementById('pd-date').textContent=r.assessed||'Unknown';
+  const av=document.getElementById('pd-ava');
+  if(av){av.textContent=r.analyst.charAt(0);av.style.background=AVATARS[r.analyst]||'#5B5BD6';}
+  const d=r.days_stale<999?r.days_stale:0;
+  const fill=document.getElementById('pd-sbar');
+  if(fill){fill.style.width=Math.min(d/90*100,100)+'%';fill.style.background=d<8?'#16A34A':d<31?'#D97706':d<61?'#EA580C':'#DC2626';}
+  const slbl=document.getElementById('pd-slbl');
+  if(slbl)slbl.textContent=d?d+' days since last review':'Review date unknown';
+  document.getElementById('cpanel').classList.add('open');
+  document.getElementById('p-overlay').classList.add('open');
+  document.querySelectorAll('#main-tb tr').forEach((tr,i)=>{tr.classList.toggle('tr-sel',_tRecs[i]&&_tRecs[i].code===r.code);});
+}
+function closePanel(){
+  document.getElementById('cpanel').classList.remove('open');
+  document.getElementById('p-overlay').classList.remove('open');
+  selCounty=null;
+  document.querySelectorAll('#main-tb tr').forEach(tr=>tr.classList.remove('tr-sel'));
+}
+</script></body></html
