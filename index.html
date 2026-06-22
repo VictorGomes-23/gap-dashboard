@@ -4,9 +4,9 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>County Gap Tracker</title>
 <script>(function(){var t=localStorage.getItem('gap-theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
-<script src="https://urldefense.com/v3/__https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js__;!!LyAuvDCm-53-y27wV7iK5g!15OPDK2beOFhnwxYqGdE-3SX1DaSU3UqjUXVBBBxlTKWaKPFd7pISjM8R2op9yeujVbQ6_uFj7c2vY9omXDkQj4xwkKaAG6a6ERVQQ$"></script>
-<script src="https://urldefense.com/v3/__https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js__;!!LyAuvDCm-53-y27wV7iK5g!15OPDK2beOFhnwxYqGdE-3SX1DaSU3UqjUXVBBBxlTKWaKPFd7pISjM8R2op9yeujVbQ6_uFj7c2vY9omXDkQj4xwkKaAG4y1ZLuLg$"></script>
-<script src="https://urldefense.com/v3/__https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js__;!!LyAuvDCm-53-y27wV7iK5g!15OPDK2beOFhnwxYqGdE-3SX1DaSU3UqjUXVBBBxlTKWaKPFd7pISjM8R2op9yeujVbQ6_uFj7c2vY9omXDkQj4xwkKaAG4ktl61AA$"></script>
+<script src="https://urldefense.com/v3/__https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js__;!!LyAuvDCm-53-y27wV7iK5g!wX95z2lKQ2XyJnaVa9itrusHgyY4gFqdoeWS5VogmSoIITC9EWVK5nVqMxCxIFvxb_VvNYtbwP4r1coVqPlEmVo1Z2wN4URWlstVWg$"></script>
+<script src="https://urldefense.com/v3/__https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js__;!!LyAuvDCm-53-y27wV7iK5g!wX95z2lKQ2XyJnaVa9itrusHgyY4gFqdoeWS5VogmSoIITC9EWVK5nVqMxCxIFvxb_VvNYtbwP4r1coVqPlEmVo1Z2wN4URDiIpFJw$"></script>
+<script src="https://urldefense.com/v3/__https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js__;!!LyAuvDCm-53-y27wV7iK5g!wX95z2lKQ2XyJnaVa9itrusHgyY4gFqdoeWS5VogmSoIITC9EWVK5nVqMxCxIFvxb_VvNYtbwP4r1coVqPlEmVo1Z2wN4UTfucXHPQ$"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -743,7 +743,7 @@ function getMapStrokeColor(){return isDark()?'rgba(255,255,255,0.07)':'rgba(255,
 async function initMap(){
   const tt=document.getElementById('mtt');
   try{
-    const us=await d3.json('https://urldefense.com/v3/__https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json__;!!LyAuvDCm-53-y27wV7iK5g!15OPDK2beOFhnwxYqGdE-3SX1DaSU3UqjUXVBBBxlTKWaKPFd7pISjM8R2op9yeujVbQ6_uFj7c2vY9omXDkQj4xwkKaAG7cXZBkyA$');
+    const us=await d3.json('us-states-10m.json');
     const svg=d3.select('#us-map');
     const proj=d3.geoAlbersUsa().scale(1280).translate([480,300]);
     const path=d3.geoPath().projection(proj);
@@ -790,7 +790,7 @@ async function initMap(){
     mapInited=true;
   }catch(e){
     const wrap=document.querySelector('.map-body')||document.getElementById('us-map').parentElement;
-    wrap.insertAdjacentHTML('beforeend','<div style="text-align:center;padding:32px;color:var(--t3);font-size:12px">Map requires internet connection</div>');
+    wrap.insertAdjacentHTML('beforeend','<div style="text-align:center;padding:32px;color:var(--t3);font-size:12px">Map data file (us-states-10m.json) not found — make sure it was uploaded to the repo alongside index.html</div>');
   }
 }
 
@@ -978,4 +978,5 @@ function closePanel(){
   selCounty=null;
   document.querySelectorAll('#main-tb tr').forEach(tr=>tr.classList.remove('tr-sel'));
 }
-</script></body></html
+</script></body></html>
+
