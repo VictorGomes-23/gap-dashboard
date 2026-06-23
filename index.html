@@ -864,7 +864,7 @@ function initRiskTab(){refreshRiskTab(getFiltered());}
 function refreshRiskTab(recs){
   const c=themeChartColors();
   const active=recs.filter(r=>r.gaps>0&&r.status!=='Inactive');
-  function bdata(arr){return arr.map(r=>({x:Math.min(r.days_stale<999?r.days_stale:90,90),y:r.gaps,r:r.volume==='High'?14:r.volume==='Medium'?9:5,_r:r}));}
+  function bdata(arr){return arr.map(r=>({x: Math.max(0, Math.min(r.days_stale || 0, 90)),y:r.gaps,r:r.volume==='High'?14:r.volume==='Medium'?9:5,_r:r}));}
   function mkDataset(arr,bg,bd){return{data:bdata(arr),backgroundColor:bg,borderColor:bd,
     borderWidth:arr.map(()=>1.5),
     pointStyle:'circle'};}
