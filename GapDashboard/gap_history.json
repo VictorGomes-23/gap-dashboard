@@ -608,7 +608,7 @@
   },
   {
     "date": "2026-07-02",
-    "total_gaps": 2303876,
+    "total_gaps": 2303865,
     "total_counties": 403,
     "clean": 239,
     "active": 129,
@@ -648,7 +648,7 @@
         "clean": 49
       },
       "Gareth": {
-        "gaps": 115743,
+        "gaps": 115732,
         "active": 14,
         "clean": 27
       }
