@@ -11,6 +11,8 @@ Now includes a QUIET WINDOW:
 
 Run this once and leave it running. Stop it with Ctrl+C.
 """
+import sys
+sys.pycache_prefix = r"C:\Documents\PythonCache"
 
 import time, threading
 from pathlib import Path

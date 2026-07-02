@@ -14,6 +14,8 @@ Can be run directly for a one-time manual build:ssessed
 Normally you do NOT run this directly — watcher.py calls into it automatically
 whenever the live spreadsheet changes.
 """
+import sys
+sys.pycache_prefix = r"C:\Documents\PythonCache"
 
 import os, sys, shutil, json, subprocess, time, argparse
 import re
