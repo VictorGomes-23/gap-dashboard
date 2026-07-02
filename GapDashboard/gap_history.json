@@ -1,0 +1,657 @@
+[
+  {
+    "date": "2026-06-15",
+    "total_gaps": 2193098,
+    "total_counties": 402,
+    "clean": 242,
+    "active": 120,
+    "monitoring": 20,
+    "pending": 8,
+    "high_vol_active": 24,
+    "by_analyst": {
+      "Alexa": {
+        "gaps": 180128,
+        "active": 19,
+        "clean": 40
+      },
+      "Kaisey": {
+        "gaps": 209602,
+        "active": 21,
+        "clean": 66
+      },
+      "Ethan": {
+        "gaps": 18529,
+        "active": 27,
+        "clean": 39
+      },
+      "Jessica": {
+        "gaps": 1781313,
+        "active": 21,
+        "clean": 50
+      },
+      "Dee": {
+        "gaps": 3526,
+        "active": 32,
+        "clean": 47
+      },
+      "Unassigned": {
+        "gaps": 0,
+        "active": 0,
+        "clean": 0
+      }
+    }
+  },
+  {
+    "date": "2026-06-16",
+    "total_gaps": 34620537,
+    "total_counties": 402,
+    "clean": 265,
+    "active": 87,
+    "monitoring": 25,
+    "pending": 13,
+    "high_vol_active": 25,
+    "by_analyst": {
+      "Donna": {
+        "gaps": 86111,
+        "active": 16,
+        "clean": 39
+      },
+      "Nettie": {
+        "gaps": 17757476,
+        "active": 14,
+        "clean": 39
+      },
+      "Ethan": {
+        "gaps": 3330,
+        "active": 22,
+        "clean": 39
+      },
+      "Jessica": {
+        "gaps": 1768670,
+        "active": 18,
+        "clean": 50
+      },
+      "Jaime": {
+        "gaps": 14885140,
+        "active": 2,
+        "clean": 28
+      },
+      "Jordan": {
+        "gaps": 8,
+        "active": 1,
+        "clean": 58
+      },
+      "Unassigned": {
+        "gaps": 0,
+        "active": 0,
+        "clean": 0
+      },
+      "Gareth": {
+        "gaps": 119802,
+        "active": 14,
+        "clean": 12
+      }
+    }
+  },
+  {
+    "date": "2026-06-17",
+    "total_gaps": 34620537,
+    "total_counties": 402,
+    "clean": 265,
+    "active": 87,
+    "monitoring": 25,
+    "pending": 13,
+    "high_vol_active": 25,
+    "by_analyst": {
+      "Donna": {
+        "gaps": 86111,
+        "active": 16,
+        "clean": 39
+      },
+      "Nettie": {
+        "gaps": 17757476,
+        "active": 14,
+        "clean": 39
+      },
+      "Ethan": {
+        "gaps": 3330,
+        "active": 22,
+        "clean": 39
+      },
+      "Jessica": {
+        "gaps": 1768670,
+        "active": 18,
+        "clean": 50
+      },
+      "Jaime": {
+        "gaps": 14885140,
+        "active": 2,
+        "clean": 28
+      },
+      "Jordan": {
+        "gaps": 8,
+        "active": 1,
+        "clean": 58
+      },
+      "Unassigned": {
+        "gaps": 0,
+        "active": 0,
+        "clean": 0
+      },
+      "Gareth": {
+        "gaps": 119802,
+        "active": 14,
+        "clean": 12
+      }
+    }
+  },
+  {
+    "date": "2026-06-18",
+    "total_gaps": 24034912,
+    "total_counties": 402,
+    "clean": 267,
+    "active": 96,
+    "monitoring": 21,
+    "pending": 18,
+    "high_vol_active": 23,
+    "by_analyst": {
+      "Donna": {
+        "gaps": 86111,
+        "active": 16,
+        "clean": 39
+      },
+      "Nettie": {
+        "gaps": 7168273,
+        "active": 11,
+        "clean": 43
+      },
+      "Ethan": {
+        "gaps": 3330,
+        "active": 22,
+        "clean": 39
+      },
+      "Jessica": {
+        "gaps": 1768670,
+        "active": 18,
+        "clean": 50
+      },
+      "Jaime": {
+        "gaps": 14882849,
+        "active": 2,
+        "clean": 28
+      },
+      "Jordan": {
+        "gaps": 7786,
+        "active": 1,
+        "clean": 56
+      },
+      "Unassigned": {
+        "gaps": 0,
+        "active": 12,
+        "clean": 0
+      },
+      "Gareth": {
+        "gaps": 117893,
+        "active": 14,
+        "clean": 12
+      }
+    }
+  },
+  {
+    "date": "2026-06-22",
+    "total_gaps": 2873672,
+    "total_counties": 402,
+    "clean": 263,
+    "active": 95,
+    "monitoring": 21,
+    "pending": 23,
+    "high_vol_active": 23,
+    "escalated": 5,
+    "by_analyst": {
+      "Donna": {
+        "gaps": 86474,
+        "active": 16,
+        "clean": 39
+      },
+      "Nettie": {
+        "gaps": 945544,
+        "active": 10,
+        "clean": 43
+      },
+      "Ethan": {
+        "gaps": 3330,
+        "active": 22,
+        "clean": 39
+      },
+      "Jessica": {
+        "gaps": 1713329,
+        "active": 18,
+        "clean": 50
+      },
+      "Jaime": {
+        "gaps": 391,
+        "active": 2,
+        "clean": 28
+      },
+      "Jordan": {
+        "gaps": 7204,
+        "active": 1,
+        "clean": 52
+      },
+      "Unassigned": {
+        "gaps": 0,
+        "active": 12,
+        "clean": 0
+      },
+      "Gareth": {
+        "gaps": 117400,
+        "active": 14,
+        "clean": 12
+      }
+    }
+  },
+  {
+    "date": "2026-06-23",
+    "total_gaps": 2876633,
+    "total_counties": 402,
+    "clean": 262,
+    "active": 99,
+    "monitoring": 21,
+    "pending": 20,
+    "high_vol_active": 24,
+    "escalated": 5,
+    "by_analyst": {
+      "Donna": {
+        "gaps": 86474,
+        "active": 16,
+        "clean": 39
+      },
+      "Nettie": {
+        "gaps": 945618,
+        "active": 13,
+        "clean": 41
+      },
+      "Ethan": {
+        "gaps": 3330,
+        "active": 22,
+        "clean": 39
+      },
+      "Jessica": {
+        "gaps": 1713329,
+        "active": 18,
+        "clean": 50
+      },
+      "Jaime": {
+        "gaps": 377,
+        "active": 2,
+        "clean": 28
+      },
+      "Jordan": {
+        "gaps": 9432,
+        "active": 2,
+        "clean": 53
+      },
+      "Unassigned": {
+        "gaps": 0,
+        "active": 12,
+        "clean": 0
+      },
+      "Gareth": {
+        "gaps": 118073,
+        "active": 14,
+        "clean": 12
+      }
+    }
+  },
+  {
+    "date": "2026-06-24",
+    "total_gaps": 2931543,
+    "total_counties": 402,
+    "clean": 227,
+    "active": 138,
+    "monitoring": 19,
+    "pending": 18,
+    "high_vol_active": 34,
+    "escalated": 6,
+    "by_analyst": {
+      "Donna": {
+        "gaps": 142743,
+        "active": 42,
+        "clean": 16
+      },
+      "Nettie": {
+        "gaps": 945549,
+        "active": 12,
+        "clean": 42
+      },
+      "Ethan": {
+        "gaps": 3330,
+        "active": 22,
+        "clean": 39
+      },
+      "Jessica": {
+        "gaps": 1713329,
+        "active": 18,
+        "clean": 50
+      },
+      "Jaime": {
+        "gaps": 377,
+        "active": 2,
+        "clean": 28
+      },
+      "Jordan": {
+        "gaps": 10029,
+        "active": 16,
+        "clean": 40
+      },
+      "Unassigned": {
+        "gaps": 0,
+        "active": 12,
+        "clean": 0
+      },
+      "Gareth": {
+        "gaps": 116186,
+        "active": 14,
+        "clean": 12
+      }
+    }
+  },
+  {
+    "date": "2026-06-25",
+    "total_gaps": 1290596,
+    "total_counties": 402,
+    "clean": 228,
+    "active": 134,
+    "monitoring": 22,
+    "pending": 18,
+    "high_vol_active": 33,
+    "escalated": 6,
+    "by_analyst": {
+      "Donna": {
+        "gaps": 142734,
+        "active": 42,
+        "clean": 16
+      },
+      "Nettie": {
+        "gaps": 945929,
+        "active": 11,
+        "clean": 43
+      },
+      "Ethan": {
+        "gaps": 3330,
+        "active": 24,
+        "clean": 37
+      },
+      "Jessica": {
+        "gaps": 72904,
+        "active": 16,
+        "clean": 51
+      },
+      "Jaime": {
+        "gaps": 164,
+        "active": 0,
+        "clean": 28
+      },
+      "Jordan": {
+        "gaps": 9952,
+        "active": 15,
+        "clean": 41
+      },
+      "Unassigned": {
+        "gaps": 0,
+        "active": 12,
+        "clean": 1
+      },
+      "Gareth": {
+        "gaps": 115583,
+        "active": 14,
+        "clean": 11
+      }
+    }
+  },
+  {
+    "date": "2026-06-26",
+    "total_gaps": 1290242,
+    "total_counties": 402,
+    "clean": 233,
+    "active": 129,
+    "monitoring": 22,
+    "pending": 18,
+    "high_vol_active": 33,
+    "escalated": 12,
+    "by_analyst": {
+      "Donna": {
+        "gaps": 142020,
+        "active": 42,
+        "clean": 16
+      },
+      "Nettie": {
+        "gaps": 946532,
+        "active": 9,
+        "clean": 45
+      },
+      "Ethan": {
+        "gaps": 3330,
+        "active": 24,
+        "clean": 37
+      },
+      "Jessica": {
+        "gaps": 72905,
+        "active": 16,
+        "clean": 51
+      },
+      "Jaime": {
+        "gaps": 164,
+        "active": 0,
+        "clean": 28
+      },
+      "Jordan": {
+        "gaps": 9668,
+        "active": 12,
+        "clean": 44
+      },
+      "Unassigned": {
+        "gaps": 0,
+        "active": 12,
+        "clean": 1
+      },
+      "Gareth": {
+        "gaps": 115623,
+        "active": 14,
+        "clean": 11
+      }
+    }
+  },
+  {
+    "date": "2026-06-29",
+    "total_gaps": 1290571,
+    "total_counties": 403,
+    "clean": 230,
+    "active": 134,
+    "monitoring": 20,
+    "pending": 19,
+    "high_vol_active": 34,
+    "escalated": 13,
+    "by_analyst": {
+      "Donna": {
+        "gaps": 98501,
+        "active": 37,
+        "clean": 18
+      },
+      "Unassigned": {
+        "gaps": 647,
+        "active": 13,
+        "clean": 1
+      },
+      "Nettie": {
+        "gaps": 945175,
+        "active": 9,
+        "clean": 44
+      },
+      "Ethan": {
+        "gaps": 48069,
+        "active": 31,
+        "clean": 43
+      },
+      "Jessica": {
+        "gaps": 72908,
+        "active": 18,
+        "clean": 53
+      },
+      "Jordan": {
+        "gaps": 9642,
+        "active": 12,
+        "clean": 44
+      },
+      "Gareth": {
+        "gaps": 115629,
+        "active": 14,
+        "clean": 27
+      }
+    }
+  },
+  {
+    "date": "2026-06-30",
+    "total_gaps": 1287547,
+    "total_counties": 403,
+    "clean": 232,
+    "active": 133,
+    "monitoring": 20,
+    "pending": 18,
+    "high_vol_active": 34,
+    "escalated": 12,
+    "by_analyst": {
+      "Donna": {
+        "gaps": 98552,
+        "active": 37,
+        "clean": 18
+      },
+      "Unassigned": {
+        "gaps": 647,
+        "active": 13,
+        "clean": 1
+      },
+      "Nettie": {
+        "gaps": 945140,
+        "active": 8,
+        "clean": 46
+      },
+      "Ethan": {
+        "gaps": 48069,
+        "active": 31,
+        "clean": 43
+      },
+      "Jessica": {
+        "gaps": 72908,
+        "active": 18,
+        "clean": 53
+      },
+      "Jordan": {
+        "gaps": 6441,
+        "active": 12,
+        "clean": 44
+      },
+      "Gareth": {
+        "gaps": 115790,
+        "active": 14,
+        "clean": 27
+      }
+    }
+  },
+  {
+    "date": "2026-07-01",
+    "total_gaps": 2303407,
+    "total_counties": 403,
+    "clean": 234,
+    "active": 134,
+    "monitoring": 19,
+    "pending": 16,
+    "high_vol_active": 35,
+    "escalated": 11,
+    "by_analyst": {
+      "Donna": {
+        "gaps": 1113314,
+        "active": 38,
+        "clean": 18
+      },
+      "Unassigned": {
+        "gaps": 647,
+        "active": 13,
+        "clean": 1
+      },
+      "Nettie": {
+        "gaps": 944526,
+        "active": 8,
+        "clean": 48
+      },
+      "Ethan": {
+        "gaps": 48069,
+        "active": 31,
+        "clean": 43
+      },
+      "Jessica": {
+        "gaps": 72908,
+        "active": 18,
+        "clean": 53
+      },
+      "Jordan": {
+        "gaps": 8167,
+        "active": 12,
+        "clean": 44
+      },
+      "Gareth": {
+        "gaps": 115776,
+        "active": 14,
+        "clean": 27
+      }
+    }
+  },
+  {
+    "date": "2026-07-02",
+    "total_gaps": 2303870,
+    "total_counties": 403,
+    "clean": 239,
+    "active": 129,
+    "monitoring": 19,
+    "pending": 16,
+    "high_vol_active": 35,
+    "escalated": 11,
+    "by_analyst": {
+      "Donna": {
+        "gaps": 1113314,
+        "active": 38,
+        "clean": 18
+      },
+      "Unassigned": {
+        "gaps": 647,
+        "active": 13,
+        "clean": 1
+      },
+      "Nettie": {
+        "gaps": 945032,
+        "active": 8,
+        "clean": 48
+      },
+      "Ethan": {
+        "gaps": 48069,
+        "active": 31,
+        "clean": 43
+      },
+      "Jessica": {
+        "gaps": 72909,
+        "active": 18,
+        "clean": 53
+      },
+      "Jordan": {
+        "gaps": 8162,
+        "active": 7,
+        "clean": 49
+      },
+      "Gareth": {
+        "gaps": 115737,
+        "active": 14,
+        "clean": 27
+      }
+    }
+  }
+]
