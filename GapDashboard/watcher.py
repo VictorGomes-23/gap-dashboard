@@ -40,8 +40,7 @@ def in_quiet_hours():
 
 # =============================================================================
 
-HEARTBEAT_FILE = gd.WORK_DIR / "watcher_heartbeat.txt"
-
+HEARTBEAT_FILE = gd.WORK_DIR / "GapDashboardSite" / "GapdashBoard" / "watcher_heartbeat.txt"
 TARGET_FILE = gd.LIVE_SOURCE.name
 WATCH_DIR   = gd.LIVE_SOURCE.parent
 
