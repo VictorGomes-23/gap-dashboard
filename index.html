@@ -4,9 +4,9 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>County Gap Tracker</title>
 <script>(function(){var t=localStorage.getItem('gap-theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
-<script src="https://urldefense.com/v3/__https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js__;!!LyAuvDCm-53-y27wV7iK5g!wX95z2lKQ2XyJnaVa9itrusHgyY4gFqdoeWS5VogmSoIITC9EWVK5nVqMxCxIFvxb_VvNYtbwP4r1coVqPlEmVo1Z2wN4URWlstVWg$"></script>
-<script src="https://urldefense.com/v3/__https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js__;!!LyAuvDCm-53-y27wV7iK5g!wX95z2lKQ2XyJnaVa9itrusHgyY4gFqdoeWS5VogmSoIITC9EWVK5nVqMxCxIFvxb_VvNYtbwP4r1coVqPlEmVo1Z2wN4URDiIpFJw$"></script>
-<script src="https://urldefense.com/v3/__https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js__;!!LyAuvDCm-53-y27wV7iK5g!wX95z2lKQ2XyJnaVa9itrusHgyY4gFqdoeWS5VogmSoIITC9EWVK5nVqMxCxIFvxb_VvNYtbwP4r1coVqPlEmVo1Z2wN4UTfucXHPQ$"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -42,6 +42,9 @@
 html{font-size:14px;scroll-behavior:smooth}
 body{font-family:var(--sans);background:var(--bg);color:var(--t0);-webkit-font-smoothing:antialiased;min-height:100vh;overflow-x:hidden}
 button,input{font-family:inherit}button{cursor:pointer}input{outline:none}
+:focus-visible{outline:2px solid var(--indigo);outline-offset:2px;border-radius:4px}
+.pill:focus-visible,.tab-btn:focus-visible,.a-btn:focus-visible{outline-offset:-2px}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.001ms !important;animation-iteration-count:1 !important;transition-duration:0.001ms !important;scroll-behavior:auto !important}}
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--scrollbar);border-radius:3px}
@@ -87,6 +90,7 @@ button,input{font-family:inherit}button{cursor:pointer}input{outline:none}
   white-space:nowrap;transition:all 0.18s ease;margin-bottom:-1px}
 .tab-btn:hover{color:var(--t1)}
 .tab-btn.active{color:var(--indigo);border-bottom-color:var(--indigo)}
+.tab-ico{width:15px;height:15px;flex-shrink:0}
 
 /* FILTER BAR */
 .filter-bar{display:flex;align-items:center;gap:10px;padding:9px 28px;
@@ -115,7 +119,7 @@ button,input{font-family:inherit}button{cursor:pointer}input{outline:none}
 .pill.pa-pnk{background:rgba(219,39,119,0.08);border-color:rgba(219,39,119,0.28);color:var(--pink)}
 .fcount{font-size:11px;color:var(--t3);white-space:nowrap;flex-shrink:0;margin-left:auto;display:flex;align-items:center;gap:5px}
 .fcount strong{color:var(--t0)}
-.clear-btn{padding:5px 11px;border-radius:20px;border:1px solid var(--b1);background:var(--s1);
+.clear-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:20px;border:1px solid var(--b1);background:var(--s1);
   color:var(--t2);font-size:11px;font-weight:600;white-space:nowrap;flex-shrink:0;transition:all 0.14s ease}
 .clear-btn:hover{border-color:rgba(220,38,38,0.30);color:var(--red);background:rgba(220,38,38,0.05)}
 
@@ -247,6 +251,7 @@ button,input{font-family:inherit}button{cursor:pointer}input{outline:none}
   color:var(--t2);font-size:12.5px;font-weight:600;box-shadow:var(--shadow);transition:all 0.14s ease}
 .a-btn:hover{border-color:var(--b2);color:var(--t0)}
 .a-btn.active{background:rgba(91,91,214,0.08);border-color:rgba(91,91,214,0.30);color:var(--indigo)}
+.a-btn.all-btn.active{background:rgba(124,58,237,0.10);border-color:rgba(124,58,237,0.35);color:var(--purple)}
 .a-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}
 .a-kpi{background:var(--s1);border-radius:var(--radius-sm);border:1px solid var(--b0);box-shadow:var(--shadow);padding:15px 17px}
 .ak-l{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:var(--t3);margin-bottom:7px}
@@ -305,6 +310,20 @@ button,input{font-family:inherit}button{cursor:pointer}input{outline:none}
 .bl-s{display:flex;flex-direction:column;align-items:center;gap:3px}
 .bl-n{font-family:var(--mono);font-size:1.9rem;font-weight:700;color:var(--t0)}
 .bl-l{font-size:11px;color:var(--t3)}
+
+/* TREND CONTROLS (new) */
+.trend-controls{display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+  background:var(--s1);border:1px solid var(--b0);border-radius:var(--radius);
+  box-shadow:var(--shadow);padding:14px 18px}
+.tc-group{display:flex;align-items:center;gap:8px}
+.tc-lbl{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--t3)}
+.seg{display:inline-flex;background:var(--s3);border:1px solid var(--b1);border-radius:9px;padding:2px;gap:2px}
+.seg-btn{padding:5px 14px;border:none;background:transparent;border-radius:7px;color:var(--t2);
+  font-size:12px;font-weight:600;transition:all 0.14s ease}
+.seg-btn:hover{color:var(--t0)}
+.seg-btn.active{background:var(--s1);color:var(--indigo);box-shadow:0 1px 3px rgba(0,0,0,0.10)}
+.tc-spacer{margin-left:auto;font-size:11px;color:var(--t3)}
+.tc-spacer strong{color:var(--t1)}
 </style>
 </head>
 <body>
@@ -314,7 +333,7 @@ button,input{font-family:inherit}button{cursor:pointer}input{outline:none}
 <header class="header">
   <div class="hdr-top">
     <div class="logo-wrap">
-      <div class="logo-icon">◈</div>
+      <div class="logo-icon"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 5-3.5 8-7 9-3.5-1-7-4-7-9V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg></div>
       <div><div class="logo-name">County Gap Tracker</div><div class="logo-sub">Fidelity National Financial</div></div>
     </div>
     <div class="hdr-right">
@@ -322,28 +341,30 @@ button,input{font-family:inherit}button{cursor:pointer}input{outline:none}
         <div>Source: <strong id="hdr-file">—</strong></div>
         <div class="fresh-row">
           <span class="fresh-dot"></span><span id="freshness">—</span>
-          <button class="refresh-btn" id="refresh-btn" title="Refresh now">⟲</button>
+          <button class="refresh-btn" id="refresh-btn" title="Refresh now" aria-label="Refresh now">
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><polyline points="21 3 21 9 15 9"/></svg>
+          </button>
         </div>
       </div>
       <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" title="Switch theme">
-        <span class="theme-ico" id="theme-ico">☽</span>
+        <span class="theme-ico" id="theme-ico"></span>
         <span class="theme-lbl" id="theme-lbl">Dark</span>
       </button>
     </div>
   </div>
   <div class="tab-nav">
-    <button class="tab-btn active" data-tab="overview" onclick="showTab('overview')">◉ &nbsp;Overview</button>
-    <button class="tab-btn" data-tab="analyst" onclick="showTab('analyst')">◈ &nbsp;Analyst Hub</button>
-    <button class="tab-btn" data-tab="risk" onclick="showTab('risk')">◎ &nbsp;Risk Matrix</button>
-    <button class="tab-btn" data-tab="trends" onclick="showTab('trends')">◷ &nbsp;Trends</button>
+    <button class="tab-btn active" data-tab="overview" onclick="showTab('overview')"><svg class="tab-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5"/></svg>Overview</button>
+    <button class="tab-btn" data-tab="analyst" onclick="showTab('analyst')"><svg class="tab-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7.2" r="3.2"/><path d="M3 20c0-4.4 3-7 6-7s6 2.6 6 7"/><circle cx="17.2" cy="8.6" r="2.3"/><path d="M15.4 20c.2-3.2 2-5.3 4.4-5.3"/></svg>Analyst Hub</button>
+    <button class="tab-btn" data-tab="risk" onclick="showTab('risk')"><svg class="tab-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l9.5 16.5h-19z"/><line x1="12" y1="10" x2="12" y2="14"/><circle cx="12" cy="17" r="0.9" fill="currentColor" stroke="none"/></svg>Risk Matrix</button>
+    <button class="tab-btn" data-tab="trends" onclick="showTab('trends')"><svg class="tab-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 6"/><polyline points="15 6 21 6 21 12"/></svg>Trends</button>
   </div>
   <div class="filter-bar">
-    <div class="fsearch"><span class="sico">⌕</span><input type="text" id="srch" placeholder="Search county…" oninput="onSearch(this.value)"></div>
+    <div class="fsearch"><span class="sico"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><line x1="20" y1="20" x2="15.8" y2="15.8"/></svg></span><input type="text" id="srch" placeholder="Search county…" oninput="onSearch(this.value)"></div>
     <div class="fsep"></div><span class="flbl">Analyst</span><div class="fpills" id="fp-analyst"></div>
     <div class="fsep"></div><span class="flbl">Status</span><div class="fpills" id="fp-status"></div>
     <div class="fsep"></div><span class="flbl">Volume</span><div class="fpills" id="fp-vol"></div>
     <div class="fsep"></div><span class="flbl">Flag</span><div class="fpills" id="fp-esc"></div>
-    <button class="clear-btn" onclick="clearAll()">✕ Clear</button>
+    <button class="clear-btn" onclick="clearAll()"><svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg> Clear</button>
     <div class="fcount">Showing <strong id="fcnt">—</strong> counties</div>
   </div>
 </header>
@@ -409,7 +430,7 @@ button,input{font-family:inherit}button{cursor:pointer}input{outline:none}
 <div id="tab-analyst" class="tab-panel">
   <div class="a-btns" id="a-btns"></div>
   <div class="a-kpi-row">
-    <div class="a-kpi"><div class="ak-l">Counties Assigned</div><div class="ak-v" id="ak-tot">—</div></div>
+    <div class="a-kpi"><div class="ak-l" id="ak-l1">Counties Assigned</div><div class="ak-v" id="ak-tot">—</div></div>
     <div class="a-kpi"><div class="ak-l">Total Gap Count</div><div class="ak-v" id="ak-gaps">—</div></div>
     <div class="a-kpi ak-d"><div class="ak-l">Active Gap Counties</div><div class="ak-v" id="ak-act">—</div></div>
     <div class="a-kpi ak-s"><div class="ak-l">Clean Counties</div><div class="ak-v" id="ak-cln">—</div></div>
@@ -417,9 +438,9 @@ button,input{font-family:inherit}button{cursor:pointer}input{outline:none}
   <div class="g2">
     <div class="card"><div class="card-h"><span class="card-title">Team Workload by Status</span></div><div class="cpad" style="height:280px;position:relative"><canvas id="ch-wl"></canvas></div></div>
     <div class="card">
-      <div class="card-h"><span class="card-title">Active Queue</span><span id="a-badge" class="a-nbadge">—</span></div>
+      <div class="card-h"><span class="card-title" id="q-title">Active Queue — All Analysts</span><span id="a-badge" class="a-nbadge">All</span></div>
       <div class="tbl-wrap" style="max-height:280px">
-        <table class="tbl"><thead><tr><th>County</th><th>State</th><th>Gaps</th><th>Volume</th><th>Action</th><th>Notes</th><th>Last Review</th></tr></thead>
+        <table class="tbl"><thead><tr><th>County</th><th>State</th><th>Analyst</th><th>Gaps</th><th>Volume</th><th>Notes</th><th>Last Review</th></tr></thead>
         <tbody id="q-tb"></tbody></table>
       </div>
     </div>
@@ -445,6 +466,7 @@ button,input{font-family:inherit}button{cursor:pointer}input{outline:none}
 </div>
 
 <div id="tab-trends" class="tab-panel">
+  <div id="trends-controls-wrap"></div>
   <div id="trends-body"><div style="text-align:center;padding:60px;color:var(--t3)">Loading…</div></div>
 </div>
 </main>
@@ -488,7 +510,7 @@ button,input{font-family:inherit}button{cursor:pointer}input{outline:none}
 <script>
 /* ── DATA STATE (populated async via fetch, not embedded) ──────── */
 let D=null, KPI=null, HIST=[], ALL=[];
-const POLL_INTERVAL_MS = 120000;   // 2 minutes — kept gentle since the source is edited by several people concurrently
+const POLL_INTERVAL_MS = 120000;
 let lastFetchTime = null;
 
 async function loadData(isPoll){
@@ -561,9 +583,11 @@ function applyChartDefaults(){
   Chart.defaults.plugins.tooltip.borderWidth=1; Chart.defaults.plugins.tooltip.padding=12; Chart.defaults.plugins.tooltip.cornerRadius=10;
   Chart.defaults.font.family="-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif";
 }
+const ICO_SUN='<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><line x1="12" y1="2.5" x2="12" y2="5.2"/><line x1="12" y1="18.8" x2="12" y2="21.5"/><line x1="2.5" y1="12" x2="5.2" y2="12"/><line x1="18.8" y1="12" x2="21.5" y2="12"/><line x1="4.9" y1="4.9" x2="6.8" y2="6.8"/><line x1="17.2" y1="17.2" x2="19.1" y2="19.1"/><line x1="4.9" y1="19.1" x2="6.8" y2="17.2"/><line x1="17.2" y1="6.8" x2="19.1" y2="4.9"/></svg>';
+const ICO_MOON='<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg>';
 function updateThemeBtn(){
   const dark=isDark();
-  document.getElementById('theme-ico').textContent=dark?'☀':'☽';
+  document.getElementById('theme-ico').innerHTML=dark?ICO_SUN:ICO_MOON;
   document.getElementById('theme-lbl').textContent=dark?'Light':'Dark';
 }
 function toggleTheme(){
@@ -624,7 +648,7 @@ function clearState(){F.state=null;refreshMapColors();document.getElementById('s
 function clearAll(){
   F={state:null,analyst:null,statuses:[],volumes:[],escalatedOnly:false,search:''};
   document.getElementById('srch').value='';
-  document.querySelectorAll('.pill').forEach(p=>p.className='pill');
+  document.querySelectorAll('.filter-bar .pill').forEach(p=>p.className='pill');
   document.getElementById('sip').classList.remove('vis');
   refreshMapColors();
   refresh();
@@ -789,7 +813,7 @@ async function initMap(){
       .on('mouseleave',()=>{tt.className='map-tooltip';});
     mapInited=true;
   }catch(e){
-    const wrap=document.querySelector('.map-body')||document.getElementById('us-map').parentElement;
+    const wrap=document.querySelector('.map-wrap')||document.getElementById('us-map').parentElement;
     wrap.insertAdjacentHTML('beforeend','<div style="text-align:center;padding:32px;color:var(--t3);font-size:12px">Map data file (us-states-10m.json) not found — make sure it was uploaded to the repo alongside index.html</div>');
   }
 }
@@ -809,18 +833,22 @@ function refreshMapColors(){
   });
 }
 
-/* ── ANALYST TAB ──────────────────────────────────────────────── */
-let _selectedAnalyst=null;
+/* ── ANALYST TAB (defaults to combined ALL view) ─────────────── */
+let _selectedAnalyst='__ALL__';
 function initAnalystTab(){
   const analysts=KPI.analysts||[];
   const box=document.getElementById('a-btns');
-  if(box)box.innerHTML=analysts.map((a,i)=>`<button class="a-btn${i===0?' active':''}" data-a="${esc(a)}" onclick="selAnalyst('${esc(a)}')">${esc(a)}</button>`).join('');
+  if(box){
+    let html=`<button class="a-btn all-btn active" data-a="__ALL__" onclick="selAnalyst('__ALL__')">All Analysts</button>`;
+    html+=analysts.map(a=>`<button class="a-btn" data-a="${esc(a)}" onclick="selAnalyst('${esc(a)}')">${esc(a)}</button>`).join('');
+    box.innerHTML=html;
+  }
   buildWorkloadChart(analysts);buildAnalystExpChart(analysts);
-  if(analysts.length){_selectedAnalyst=analysts[0];selAnalyst(analysts[0]);}
+  selAnalyst('__ALL__');
 }
 function refreshAnalystSelection(){
   buildWorkloadChart(KPI.analysts||[]);buildAnalystExpChart(KPI.analysts||[]);
-  if(_selectedAnalyst) selAnalyst(_selectedAnalyst);
+  selAnalyst(_selectedAnalyst);
 }
 function buildWorkloadChart(analysts){
   const c=themeChartColors();
@@ -840,23 +868,48 @@ function buildAnalystExpChart(analysts){
       plugins:{legend:{position:'bottom',labels:{color:c.legend,padding:12,usePointStyle:true}},
         tooltip:{callbacks:{label:ctx=>' '+ctx.label+': '+(ctx.raw).toLocaleString()+' gaps'}}}}});
 }
+function analystQueue(name){
+  return ALL.filter(r=>r.analyst===name&&r.status==='Active gaps').sort((a,b)=>b.gaps-a.gaps);
+}
 function selAnalyst(name){
   _selectedAnalyst=name;
   document.querySelectorAll('.a-btn').forEach(b=>b.classList.toggle('active',b.dataset.a===name));
-  const lbl=document.getElementById('a-badge');if(lbl)lbl.textContent=name;
-  const a=KPI.by_analyst[name]||{};
+  const isAll=(name==='__ALL__');
+  const badge=document.getElementById('a-badge');
+  const qTitle=document.getElementById('q-title');
+  const ak1=document.getElementById('ak-l1');
   const sv=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=(v||0).toLocaleString();};
-  sv('ak-tot',a.total);sv('ak-gaps',a.gaps);sv('ak-act',a.active);sv('ak-cln',a.clean);
-  const queue=(KPI.analyst_queues||{})[name]||[];
+
+  if(isAll){
+    if(badge)badge.textContent='All';
+    if(qTitle)qTitle.textContent='Active Queue — All Analysts';
+    if(ak1)ak1.textContent='Total Counties';
+    // Team-wide totals
+    const analysts=KPI.analysts||[];
+    let tot=0,gaps=0,act=0,cln=0;
+    analysts.forEach(a=>{const x=KPI.by_analyst[a]||{};tot+=x.total||0;gaps+=x.gaps||0;act+=x.active||0;cln+=x.clean||0;});
+    sv('ak-tot',tot);sv('ak-gaps',gaps);sv('ak-act',act);sv('ak-cln',cln);
+    // Combined active queue across everyone, sorted by gaps
+    renderQueue(analysts.flatMap(analystQueue).sort((a,b)=>b.gaps-a.gaps),true);
+  }else{
+    if(badge)badge.textContent=name;
+    if(qTitle)qTitle.textContent='Active Queue — '+name;
+    if(ak1)ak1.textContent='Counties Assigned';
+    const a=KPI.by_analyst[name]||{};
+    sv('ak-tot',a.total);sv('ak-gaps',a.gaps);sv('ak-act',a.active);sv('ak-cln',a.clean);
+    renderQueue(analystQueue(name),false);
+  }
+}
+function renderQueue(queue,showAnalyst){
   const tb=document.getElementById('q-tb');if(!tb)return;
-  tb.innerHTML=!queue.length?`<tr><td colspan="7" class="empty-st">No active gaps for ${esc(name)} 🎉</td></tr>`:
-    queue.map(r=>`<tr class="tr-hover ${r.volume==='High'?'row-hi':r.volume==='Medium'?'row-md':''} ${r.escalated?'row-esc':''}" onclick="openPanel(${JSON.stringify(r).replace(/"/g,'&quot;')})">
-      <td>${eFlag(r)}<span class="cname">${esc(r.county)}</span></td><td><span class="schip">${esc(r.state)}</span></td>
-      <td class="ncol">${xTag(r.gaps)}${r.gaps.toLocaleString()}</td>
-      <td>${vBadge(r.volume)}</td>
-      <td class="ntxt" title="${esc(r.action)}">${esc(trunc(r.action))}</td>
-      <td class="ntxt" title="${esc(r.comments)}">${esc(trunc(r.comments))}</td>
-      <td>${dBadge(r.days_stale)}</td></tr>`).join('');
+  if(!queue.length){tb.innerHTML=`<tr><td colspan="7" class="empty-st">No active gaps 🎉</td></tr>`;return;}
+  tb.innerHTML=queue.map(r=>`<tr class="tr-hover ${r.volume==='High'?'row-hi':r.volume==='Medium'?'row-md':''} ${r.escalated?'row-esc':''}" onclick="openPanel(${JSON.stringify(r).replace(/"/g,'&quot;')})">
+    <td>${eFlag(r)}<span class="cname">${esc(r.county)}</span></td><td><span class="schip">${esc(r.state)}</span></td>
+    <td class="atxt">${esc(r.analyst)}</td>
+    <td class="ncol">${xTag(r.gaps)}${r.gaps.toLocaleString()}</td>
+    <td>${vBadge(r.volume)}</td>
+    <td class="ntxt" title="${esc(r.comments||r.action)}">${esc(trunc(r.comments||r.action))}</td>
+    <td>${dBadge(r.days_stale)}</td></tr>`).join('');
 }
 
 /* ── RISK TAB ─────────────────────────────────────────────────── */
@@ -865,9 +918,6 @@ function refreshRiskTab(recs){
   const c=themeChartColors();
   const active=recs.filter(r=>r.gaps>0&&r.status!=='Inactive');
   function bdata(arr){return arr.map(r=>({x: Math.max(0, Math.min(r.days_stale || 0, 90)),y:r.gaps,r:r.volume==='High'?14:r.volume==='Medium'?9:5,_r:r}));}
-  function mkDataset(arr,bg,bd){return{data:bdata(arr),backgroundColor:bg,borderColor:bd,
-    borderWidth:arr.map(()=>1.5),
-    pointStyle:'circle'};}
   const high=active.filter(r=>r.volume==='High'), med=active.filter(r=>r.volume==='Medium'), low=active.filter(r=>r.volume==='Low');
   function widths(arr){return bdata(arr).map(d=>d._r.escalated?4:1.5);}
   function borderCols(arr,fallback){return bdata(arr).map(d=>d._r.escalated?'#DB2777':fallback);}
@@ -902,23 +952,103 @@ function refreshRiskTab(recs){
     </tr>`).join('');
 }
 
-/* ── TRENDS TAB ───────────────────────────────────────────────── */
-function initTrendsTab(){renderTrends();}
+/* ── TRENDS TAB (with granularity + range controls) ──────────── */
+let trendGranularity='daily';   // daily | weekly | monthly
+let trendRange='all';           // 30 | 90 | all
+
+function initTrendsTab(){ buildTrendControls(); renderTrends(); }
+
+function buildTrendControls(){
+  const wrap=document.getElementById('trends-controls-wrap');
+  if(!wrap)return;
+  wrap.innerHTML=`
+    <div class="trend-controls">
+      <div class="tc-group">
+        <span class="tc-lbl">View</span>
+        <div class="seg" id="seg-gran">
+          <button class="seg-btn active" data-g="daily" onclick="setGran('daily')">Daily</button>
+          <button class="seg-btn" data-g="weekly" onclick="setGran('weekly')">Weekly</button>
+          <button class="seg-btn" data-g="monthly" onclick="setGran('monthly')">Monthly</button>
+        </div>
+      </div>
+      <div class="tc-group">
+        <span class="tc-lbl">Range</span>
+        <div class="seg" id="seg-range">
+          <button class="seg-btn" data-r="30" onclick="setRange('30')">30 days</button>
+          <button class="seg-btn" data-r="90" onclick="setRange('90')">90 days</button>
+          <button class="seg-btn active" data-r="all" onclick="setRange('all')">All time</button>
+        </div>
+      </div>
+      <div class="tc-spacer" id="tc-info"></div>
+    </div>`;
+}
+function setGran(g){trendGranularity=g;document.querySelectorAll('#seg-gran .seg-btn').forEach(b=>b.classList.toggle('active',b.dataset.g===g));renderTrends();}
+function setRange(r){trendRange=r;document.querySelectorAll('#seg-range .seg-btn').forEach(b=>b.classList.toggle('active',b.dataset.r===r));renderTrends();}
+
+// ISO week key, e.g. "2026-W25"
+function isoWeekKey(dateStr){
+  const d=new Date(dateStr+'T00:00:00');
+  const t=new Date(d.valueOf());
+  const day=(d.getDay()+6)%7;               // Mon=0
+  t.setDate(t.getDate()-day+3);             // nearest Thursday
+  const firstThu=new Date(t.getFullYear(),0,4);
+  const week=1+Math.round(((t-firstThu)/86400000-3+((firstThu.getDay()+6)%7))/7);
+  return t.getFullYear()+'-W'+String(week).padStart(2,'0');
+}
+function monthKey(dateStr){return dateStr.slice(0,7);}   // "2026-06"
+
+// Roll daily snapshots up to the chosen granularity.
+// For point-in-time metrics (gap counts, status counts) we take the LAST
+// snapshot in each bucket — the end-of-period state — since averaging a
+// running total isn't meaningful. This mirrors how financial period-end
+// reporting works.
+function aggregateHistory(hist, gran){
+  if(gran==='daily') return hist.map(h=>({...h, label:h.date}));
+  const buckets={};
+  hist.forEach(h=>{
+    const key = gran==='weekly' ? isoWeekKey(h.date) : monthKey(h.date);
+    if(!buckets[key]) buckets[key]={key,items:[]};
+    buckets[key].items.push(h);
+  });
+  return Object.values(buckets).sort((a,b)=>a.key<b.key?-1:1).map(b=>{
+    const last=b.items[b.items.length-1];   // period-end state
+    return {...last, label:b.key, _bucketCount:b.items.length};
+  });
+}
+
+function applyRange(hist){
+  if(trendRange==='all') return hist;
+  const days=parseInt(trendRange,10);
+  const cutoff=new Date(); cutoff.setDate(cutoff.getDate()-days);
+  return hist.filter(h=>new Date(h.date+'T00:00:00')>=cutoff);
+}
+
 function renderTrends(){
   const tc=document.getElementById('trends-body');if(!tc)return;
-  if(!HIST||HIST.length<2){
-    const s=HIST[0]||{};
+  const ranged=applyRange(HIST);
+  const agg=aggregateHistory(ranged, trendGranularity);
+
+  const info=document.getElementById('tc-info');
+  if(info){
+    const unit=trendGranularity==='daily'?'day':trendGranularity==='weekly'?'week':'month';
+    info.innerHTML=agg.length?`Showing <strong>${agg.length}</strong> ${unit}${agg.length!==1?'s':''} of data`:'';
+  }
+
+  if(!agg || agg.length<2){
+    const s=(agg&&agg[0])||HIST[0]||{};
     tc.innerHTML=`<div class="baseline"><div class="bl-icon">📍</div>
-      <div class="bl-hed">Baseline Established</div>
+      <div class="bl-hed">Not Enough Data Yet</div>
       <div style="font-size:12px;color:var(--t3);margin-bottom:10px">${s.date||'Today'}</div>
-      <div class="bl-body">Trends appear once a second calendar day of data has been captured. Since the watcher updates throughout the day, today's snapshot keeps refining — check back tomorrow for the first trend line.</div>
+      <div class="bl-body">A trend line needs at least two ${trendGranularity==='daily'?'days':trendGranularity==='weekly'?'weeks':'months'} of history in the selected range. Try widening the range, switching to Daily view, or check back after more data has been captured.</div>
       <div class="bl-stats">
         <div class="bl-s"><span class="bl-n">${(s.total_gaps||0).toLocaleString()}</span><span class="bl-l">Total Gaps</span></div>
         <div class="bl-s"><span class="bl-n">${s.active||0}</span><span class="bl-l">Active</span></div>
         <div class="bl-s"><span class="bl-n">${s.clean||0}</span><span class="bl-l">Clean</span></div>
         <div class="bl-s"><span class="bl-n">${s.escalated||0}</span><span class="bl-l">Escalated</span></div>
-      </div></div>`;return;
+      </div></div>`;
+    return;
   }
+
   tc.innerHTML=`
     <div class="g2">
       <div class="card"><div class="card-h"><span class="card-title">Total Gaps Over Time</span></div><div class="cpad" style="height:260px;position:relative"><canvas id="ch-t1"></canvas></div></div>
@@ -928,20 +1058,23 @@ function renderTrends(){
       <div class="card"><div class="card-h"><span class="card-title">Escalations Over Time</span></div><div class="cpad" style="height:240px;position:relative"><canvas id="ch-t4"></canvas></div></div>
       <div class="card"><div class="card-h"><span class="card-title">Analyst Gaps Over Time</span></div><div class="cpad" style="height:240px;position:relative"><canvas id="ch-t3"></canvas></div></div>
     </div>`;
-  const labels=HIST.map(h=>h.date);
+
+  const labels=agg.map(h=>h.label);
   const c=themeChartColors();
-  const sc={x:{ticks:{color:c.axis},grid:{color:c.grid}},y:{ticks:{color:c.axis,callback:v=>v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?(v/1e3).toFixed(0)+'K':v},grid:{color:c.grid}}};
-  mkChart('ch-t1',{type:'line',data:{labels,datasets:[{label:'Total Gaps',data:HIST.map(h=>h.total_gaps),borderColor:'#5B5BD6',backgroundColor:'rgba(91,91,214,0.07)',fill:true,tension:0.4,pointBackgroundColor:'#5B5BD6',pointRadius:5}]},
+  const sc={x:{ticks:{color:c.axis,maxRotation:0,autoSkip:true,maxTicksLimit:12},grid:{color:c.grid}},y:{ticks:{color:c.axis,callback:v=>v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?(v/1e3).toFixed(0)+'K':v},grid:{color:c.grid}}};
+  const pr=agg.length>40?2:agg.length>20?3:5;
+
+  mkChart('ch-t1',{type:'line',data:{labels,datasets:[{label:'Total Gaps',data:agg.map(h=>h.total_gaps),borderColor:'#5B5BD6',backgroundColor:'rgba(91,91,214,0.07)',fill:true,tension:0.4,pointBackgroundColor:'#5B5BD6',pointRadius:pr}]},
     options:{responsive:true,maintainAspectRatio:false,scales:sc,plugins:{legend:{labels:{color:c.legend}}}}});
   mkChart('ch-t2',{type:'line',data:{labels,datasets:[
-    {label:'Active',data:HIST.map(h=>h.active),borderColor:'#DC2626',backgroundColor:'rgba(220,38,38,0.06)',fill:true,tension:0.4,pointRadius:4},
-    {label:'Clean',data:HIST.map(h=>h.clean),borderColor:'#16A34A',backgroundColor:'rgba(22,163,74,0.06)',fill:true,tension:0.4,pointRadius:4},
-    {label:'Monitoring',data:HIST.map(h=>h.monitoring),borderColor:'#D97706',fill:false,tension:0.4,pointRadius:3,borderDash:[4,3]},
+    {label:'Active',data:agg.map(h=>h.active),borderColor:'#DC2626',backgroundColor:'rgba(220,38,38,0.06)',fill:true,tension:0.4,pointRadius:Math.max(2,pr-1)},
+    {label:'Clean',data:agg.map(h=>h.clean),borderColor:'#16A34A',backgroundColor:'rgba(22,163,74,0.06)',fill:true,tension:0.4,pointRadius:Math.max(2,pr-1)},
+    {label:'Monitoring',data:agg.map(h=>h.monitoring),borderColor:'#D97706',fill:false,tension:0.4,pointRadius:Math.max(2,pr-2),borderDash:[4,3]},
   ]},options:{responsive:true,maintainAspectRatio:false,scales:sc,plugins:{legend:{position:'bottom',labels:{color:c.legend,padding:12,usePointStyle:true}}}}});
-  mkChart('ch-t4',{type:'line',data:{labels,datasets:[{label:'Escalated Counties',data:HIST.map(h=>h.escalated||0),borderColor:'#DB2777',backgroundColor:'rgba(219,39,119,0.08)',fill:true,tension:0.4,pointBackgroundColor:'#DB2777',pointRadius:5}]},
+  mkChart('ch-t4',{type:'line',data:{labels,datasets:[{label:'Escalated Counties',data:agg.map(h=>h.escalated||0),borderColor:'#DB2777',backgroundColor:'rgba(219,39,119,0.08)',fill:true,tension:0.4,pointBackgroundColor:'#DB2777',pointRadius:pr}]},
     options:{responsive:true,maintainAspectRatio:false,scales:sc,plugins:{legend:{labels:{color:c.legend}}}}});
   const analysts=KPI.analysts||[];
-  mkChart('ch-t3',{type:'line',data:{labels,datasets:analysts.map((a,i)=>({label:a,data:HIST.map(h=>(h.by_analyst||{})[a]?h.by_analyst[a].gaps||0:0),borderColor:AC[i%AC.length],fill:false,tension:0.4,pointRadius:4}))},
+  mkChart('ch-t3',{type:'line',data:{labels,datasets:analysts.map((a,i)=>({label:a,data:agg.map(h=>(h.by_analyst||{})[a]?h.by_analyst[a].gaps||0:0),borderColor:AC[i%AC.length],fill:false,tension:0.4,pointRadius:Math.max(2,pr-1)}))},
     options:{responsive:true,maintainAspectRatio:false,scales:sc,plugins:{legend:{position:'bottom',labels:{color:c.legend,padding:12,usePointStyle:true}}}}});
 }
 
@@ -978,5 +1111,5 @@ function closePanel(){
   selCounty=null;
   document.querySelectorAll('#main-tb tr').forEach(tr=>tr.classList.remove('tr-sel'));
 }
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closePanel();});
 </script></body></html>
-

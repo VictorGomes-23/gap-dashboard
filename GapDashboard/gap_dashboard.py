@@ -24,8 +24,11 @@ from collections import defaultdict
 try:
     import openpyxl
 except ImportError:
-    os.system(f'"{sys.executable}" -m pip install openpyxl --quiet')
-    import openpyxl
+    sys.exit(
+        "openpyxl is not installed.\n"
+        "Run:  pip install -r requirements.txt\n"
+        "(from this script's folder) and try again."
+    )
 
 # =============================================================================
 # CONFIGURATION — edit these four paths for your machine
@@ -484,16 +487,19 @@ def enrich_from_past(history):
 # COMPUTE DASHBOARD DATA
 # =============================================================================
 def compute_data(records):
+    # NOTE: this only computes what the dashboard's own JS can't cheaply derive
+    # itself from `records` on every filter change. Earlier versions also built
+    # critical_counties/on_hold_counties/stale_counties/escalated_counties/
+    # top_counties/analyst_queues here and shipped them in data.json, but
+    # index.html never reads any of those — it recomputes the same lists
+    # client-side from `records` on every filter interaction anyway. Keeping
+    # both meant every poll shipped duplicate copies of up to ~65 full county
+    # records for nothing. Only the counts survive here, for the console log.
     total = len(records); tg = sum(r["gaps"] for r in records)
     sc = defaultdict(int)
     for r in records: sc[r["status"]] += 1
     health = round(sc.get("Clean",0)/total*100,1) if total else 0
-
-    critical = [r for r in records if r["status"].lower().startswith("active") and r["volume"]=="High"]
-    on_hold  = [r for r in records if "hold" in r["comments"].lower()]
-    stale    = sorted([r for r in records if r["days_stale"]<999 and r["days_stale"]>30
-                       and r["status"] not in ("Clean","Inactive")], key=lambda x:-x["days_stale"])
-    escalated = sorted([r for r in records if r.get("escalated")], key=lambda x:-x["gaps"])
+    escalated_count = sum(1 for r in records if r.get("escalated"))
 
     bs = defaultdict(lambda: {"gaps":0,"active":0,"clean":0,"monitoring":0,"counties":0})
     for r in records:
@@ -511,8 +517,6 @@ def compute_data(records):
         ba[a]["clean"]      += 1 if r["status"].lower().startswith("clean")       else 0
         ba[a]["monitoring"] += 1 if r["status"].lower().startswith("monitoring")  else 0
         ba[a]["pending"]    += 1 if r["status"].lower().startswith("pending")     else 0
-    aq = {a: sorted([r for r in records if r["analyst"]==a and r["status"]=="Active gaps"],
-                     key=lambda x:-x["gaps"]) for a in analysts}
 
     gtc = defaultdict(int)
     for r in records:
@@ -521,14 +525,9 @@ def compute_data(records):
 
     return {
         "total_counties": total, "total_gaps": tg, "health_score": health,
-        "status_counts": dict(sc), "critical_count": len(critical),
-        "on_hold_count": len(on_hold), "stale_count": len(stale),
-        "escalated_count": len(escalated),
-        "critical_counties": critical[:10], "on_hold_counties": on_hold[:10],
-        "stale_counties": stale[:10], "escalated_counties": escalated[:10],
+        "status_counts": dict(sc), "escalated_count": escalated_count,
         "state_list": state_list, "analysts": analysts,
-        "by_analyst": {k:dict(v) for k,v in ba.items()}, "analyst_queues": aq,
-        "top_counties": sorted([r for r in records if r["gaps"]>0], key=lambda x:-x["gaps"])[:25],
+        "by_analyst": {k:dict(v) for k,v in ba.items()},
         "gap_types": dict(gtc), "all_records": records,
     }
 
@@ -549,18 +548,36 @@ def build_payload(data, history, source_name):
 # =============================================================================
 _NO_WINDOW = subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0
 
+def _git(*args):
+    return subprocess.run(["git", *args], cwd=REPO_DIR, check=True,
+                           capture_output=True, creationflags=_NO_WINDOW)
+
 def git_push(message):
     if not (REPO_DIR / ".git").exists():
         print(f"[ERROR] {REPO_DIR} is not a git repo. See setup instructions.")
         return False
     try:
-        subprocess.run(["git","add","-A"], cwd=REPO_DIR, check=True, capture_output=True, creationflags=_NO_WINDOW)
+        _git("add", "-A")
         status = subprocess.run(["git","status","--porcelain"], cwd=REPO_DIR, capture_output=True, text=True, creationflags=_NO_WINDOW)
         if not status.stdout.strip():
             print("[INFO] No changes to publish.")
             return False
-        subprocess.run(["git","commit","-m",message], cwd=REPO_DIR, check=True, capture_output=True, creationflags=_NO_WINDOW)
-        subprocess.run(["git","push"], cwd=REPO_DIR, check=True, capture_output=True, creationflags=_NO_WINDOW)
+        _git("commit", "-m", message)
+
+        # Rebase onto whatever's on the remote before pushing. Without this,
+        # any commit made to the repo from somewhere else (another machine, a
+        # PR merge, a manual edit) makes this push a non-fast-forward reject,
+        # which previously required a manual `git pull` + merge to unstick —
+        # this is almost certainly why past history shows a "Complete merge"
+        # commit in the middle of otherwise-automatic updates.
+        try:
+            _git("pull", "--rebase", "--autostash")
+        except subprocess.CalledProcessError as e:
+            err = e.stderr.decode() if e.stderr else str(e)
+            print(f"[ERROR] git pull --rebase failed, not pushing: {err}")
+            return False
+
+        _git("push")
         print("[OK] Pushed to GitHub Pages.")
         return True
     except subprocess.CalledProcessError as e:
