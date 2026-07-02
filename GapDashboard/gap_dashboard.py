@@ -38,7 +38,7 @@ except ImportError:
 LIVE_SOURCE = Path(r"C:\Users\victor.gomes\Fidelity National Financial\Grubowski, Alexa - test\Master-Gap Breakdown.xlsm")
 
 # Your existing OneDrive working folder — current/, past/, and history live here.
-WORK_DIR  = Path(r"C:\Documents\GapDashboardSite\GapDashboard")
+WORK_DIR  = Path(r"C:\Documents")
 DIR_CUR   = WORK_DIR / "current"
 DIR_PAST  = WORK_DIR / "past"
 HIST_FILE = WORK_DIR / "gap_history.json"
